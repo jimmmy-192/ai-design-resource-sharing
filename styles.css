@@ -216,9 +216,16 @@ h1 {
 .category {
   display: inline-flex;
   max-width: 210px;
+  min-height: 24px;
+  padding: 3px 8px;
   overflow: hidden;
+  color: var(--accent);
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: rgba(22, 79, 70, 0.08);
+  border: 1px solid rgba(22, 79, 70, 0.16);
+  border-radius: 999px;
+  align-items: center;
 }
 
 .score {
