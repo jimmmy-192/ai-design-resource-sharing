@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI 设计资源精选"
+  short_description: "为初级 B 端设计师筛选并评分每周设计资源"
+  default_prompt: "使用 $curate-ai-design-resources 为本周团队资源分享筛选并评分设计资源。"
