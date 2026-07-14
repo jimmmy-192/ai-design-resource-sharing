@@ -233,14 +233,15 @@ h1 {
 }
 
 .card-title {
+  display: -webkit-box;
   min-width: 0;
   margin: 0;
   overflow: hidden;
   font-size: clamp(24px, 3.2vw, 32px);
   font-weight: 790;
   line-height: 1.05;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .open-link {
@@ -265,14 +266,15 @@ h1 {
 }
 
 .card-summary {
+  display: -webkit-box;
   margin: 0;
   overflow: hidden;
   color: #26302b;
   font-size: 15px;
   font-weight: 650;
   line-height: 1.5;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .card-description {
@@ -310,7 +312,7 @@ h1 {
   right: 0;
   bottom: 0;
   left: 0;
-  min-height: 94px;
+  display: block;
   max-height: none;
   padding: 16px 24px 20px;
   background: var(--surface);
@@ -319,6 +321,7 @@ h1 {
   opacity: 0;
   pointer-events: none;
   transform: translateY(100%);
+  -webkit-line-clamp: unset;
 }
 
 .resource-card .card-description {
@@ -432,8 +435,8 @@ h1 {
   .resource-card {
     top: calc(50% - clamp(18px, 2.5vh, 28px));
     width: min(360px, calc(100vw - 32px));
-    height: min(500px, 64svh);
-    min-height: 460px;
+    height: clamp(430px, calc(100svh - 210px), 520px);
+    min-height: 0;
   }
 
   .card-body {
@@ -442,6 +445,41 @@ h1 {
 
   .card-title {
     font-size: 25px;
+  }
+
+  .card-summary {
+    -webkit-line-clamp: 2;
+  }
+
+  .resource-card .card-action {
+    padding: 14px 21px 18px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 761px) {
+  .app-shell {
+    padding-right: 34px;
+    padding-left: 34px;
+  }
+
+  .resource-card {
+    grid-template-rows: minmax(170px, 50%) auto;
+    width: clamp(320px, 38vw, 400px);
+    height: clamp(450px, 62vh, 540px);
+  }
+
+  .card-body {
+    gap: 10px;
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 28px;
+  }
+
+  .resource-card .card-action {
+    padding: 14px 20px 18px;
   }
 }
 
@@ -479,10 +517,10 @@ h1 {
   }
 
   .card-description {
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
   }
 
   .card-action {
-    -webkit-line-clamp: 2;
+    font-size: 13px;
   }
 }
