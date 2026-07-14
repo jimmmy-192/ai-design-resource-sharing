@@ -230,6 +230,7 @@ h1 {
   grid-template-columns: 1fr 44px;
   gap: 16px;
   align-items: center;
+  min-height: clamp(56px, 6vw, 72px);
 }
 
 .card-title {
@@ -267,6 +268,7 @@ h1 {
 
 .card-summary {
   display: -webkit-box;
+  min-height: 45px;
   margin: 0;
   overflow: hidden;
   color: #26302b;
@@ -279,6 +281,7 @@ h1 {
 
 .card-description {
   display: -webkit-box;
+  min-height: 68px;
   margin: 0;
   overflow: hidden;
   color: var(--muted);
@@ -313,6 +316,7 @@ h1 {
   bottom: 0;
   left: 0;
   display: block;
+  min-height: 154px;
   max-height: none;
   padding: 16px 24px 20px;
   background: var(--surface);
@@ -452,6 +456,7 @@ h1 {
   }
 
   .resource-card .card-action {
+    min-height: 126px;
     padding: 14px 21px 18px;
     font-size: 13px;
   }
@@ -474,11 +479,24 @@ h1 {
     padding: 20px;
   }
 
+  .card-title-row {
+    min-height: 56px;
+  }
+
+  .card-summary {
+    min-height: 42px;
+  }
+
+  .card-description {
+    min-height: 56px;
+  }
+
   .card-title {
     font-size: 28px;
   }
 
   .resource-card .card-action {
+    min-height: 132px;
     padding: 14px 20px 18px;
   }
 }
@@ -514,6 +532,22 @@ h1 {
   .card-body {
     gap: 9px;
     padding: 20px;
+  }
+
+  .card-title-row {
+    min-height: 50px;
+  }
+
+  .card-summary {
+    min-height: 40px;
+  }
+
+  .card-description {
+    min-height: 40px;
+  }
+
+  .resource-card .card-action {
+    min-height: 112px;
   }
 
   .card-description {
