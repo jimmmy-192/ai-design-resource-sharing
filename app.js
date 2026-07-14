@@ -128,7 +128,7 @@ function makeCard(resource, index) {
       </div>
       <p class="card-summary">${resource.summary}</p>
       <p class="card-description">${resource.description}</p>
-      <p class="card-action"><span>可以怎么用</span></p>
+      <p class="card-action"><span>可以怎么用</span>${resource.action}</p>
     </div>
   `;
 
