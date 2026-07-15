@@ -126,9 +126,11 @@ function makeCard(resource, index) {
         <h2 class="card-title">${resource.title}</h2>
         <a class="open-link" href="${resource.url}" target="_blank" rel="noreferrer" aria-label="打开 ${resource.title}">→</a>
       </div>
-      <p class="card-summary">${resource.summary}</p>
-      <p class="card-description">${resource.description}</p>
-      <p class="card-action"><span>可以怎么用</span>${resource.action}</p>
+      <div class="card-details">
+        <p class="card-summary">${resource.summary}</p>
+        <p class="card-description">${resource.description}</p>
+        <p class="card-action"><span>可以怎么用</span>${resource.action}</p>
+      </div>
     </div>
   `;
 
