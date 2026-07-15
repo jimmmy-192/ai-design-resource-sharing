@@ -50,7 +50,7 @@ const issues = [
         description:
           "它对应设计师经常被忽略的交付包装环节，适合团队周报、产品更新、应用商店截图和功能讲解的固定模板沉淀。尤其适合研究如何把一次性素材变成团队可复用的资产，降低发布前临时拼图的成本。",
         action: "拿一张最近的产品截图试做固定模板：设备框、标题、标注和背景风格都保存下来，之后复用到周报和发布图。",
-        url: "https://apps.apple.com/us/app/framed-mockup-studio/id6766568592?mt=12"
+        url: "https://framedmockup.com"
       },
       {
         title: "OpenPencil",
