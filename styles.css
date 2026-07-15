@@ -334,8 +334,6 @@ h1 {
   max-height: none;
   padding: 16px 24px 20px;
   background: var(--surface);
-  border-top: 1px solid rgba(23, 33, 28, 0.1);
-  box-shadow: 0 -12px 26px rgba(34, 29, 20, 0.08);
   opacity: 0;
   pointer-events: none;
   transform: translateY(100%);
