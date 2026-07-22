@@ -65,12 +65,79 @@ const issues = [
         url: "https://github.com/open-pencil/open-pencil"
       }
     ]
+  },
+  {
+    id: "2026-W30",
+    label: "第二期（7.15-7.22）",
+    range: "2026-W30 / 7.15-7.22",
+    resources: [
+      {
+        title: "Genspark 6.0",
+        category: "AI 设计工作流",
+        score: "15/15",
+        coverImage: "./assets/covers/genspark.png",
+        visualLabel: "Workspace 6.0",
+        summary: "把设计、原型、内容生成和协作合并进同一个带记忆的 AI 工作区。",
+        description:
+          "7 月 20 日发布的 6.0 把 SecondBrain、Design、AgentBase 和 GenTeam 放在同一层级。值得观察它如何把持久上下文作为入口，让品牌规则、已有素材和项目决策不必在每个设计任务里重复说明。",
+        action: "用一个真实需求拆成“参考素材、原型、交付素材”三段，记录哪些品牌约束可以交给记忆层，哪些仍必须由设计师逐项审核。",
+        url: "https://www.genspark.ai/blog/genspark-ai-workspace-6"
+      },
+      {
+        title: "Loova Ads Studio",
+        category: "AI 视觉生产",
+        score: "14/15",
+        coverImage: "./assets/covers/loova.png",
+        visualLabel: "Ads Studio",
+        summary: "把商品素材、广告格式和创意方向批量变成可测试的图片与视频版本。",
+        description:
+          "7 月 20 日上线的 Ads Studio 把 UGC 视频、商品广告、虚拟人和静态视觉放进同一套创意流程。它的价值不只是生成单条素材，而是让不同 Hook、商品和人物替换成为连续的对照实验。",
+        action: "选一张已有商品图，先定义三个不同开场 Hook，再比较工具如何保持商品信息一致，以及哪些镜头和文案仍需要人工把关。",
+        url: "https://loova.ai"
+      },
+      {
+        title: "V2Fun",
+        category: "AI 3D 动效",
+        score: "14/15",
+        coverImage: "./assets/covers/v2fun.png",
+        visualLabel: "3D Pipeline",
+        summary: "从文字或参考图生成 3D 角色，再完成绑定、贴图和视频动捕驱动。",
+        description:
+          "它把图生 3D、自动绑定、动作库和视频动捕串成连续流程，并支持 GLB、FBX、PMX 等文件继续使用。适合研究 3D 资产如何从概念验证进入动效预演，而不是停留在一张渲染图。",
+        action: "用一张角色概念图做测试，分别检查模型结构、骨骼节点和动作迁移三个环节，判断它是否能作为前期动效分镜的快速验证工具。",
+        url: "https://v2fun.ai"
+      },
+      {
+        title: "Miora",
+        category: "AI 创意画布",
+        score: "14/15",
+        coverImage: "./assets/covers/miora.jpg",
+        visualLabel: "Agentic Canvas",
+        summary: "在可编辑画布上生成图像、UI、3D 和品牌资产，并将偏好沉淀为可复用 Skill。",
+        description:
+          "它把一次创意任务中的风格、规则和禁忌自动积累为可编辑记忆，后续内容继续沿用同一套偏好。虽然在本期开始前发布，但仍处于 30 天新鲜度窗口，适合作为“品牌一致性如何被工具保存”的补充样本。",
+        action: "为一个虚拟品牌写下颜色、语气和禁用元素，连续生成两轮不同物料，再检查第二轮是否真正继承了第一轮的设计约束。",
+        url: "https://miora.design"
+      },
+      {
+        title: "dot.",
+        category: "原型反馈工具",
+        score: "15/15",
+        coverImage: "./assets/covers/dot.jpg",
+        visualLabel: "Pinned Feedback",
+        summary: "给任意线上页面添加无登录的点击定位评论，并保留每次迭代的版本上下文。",
+        description:
+          "它允许评审者直接在页面任意位置留下 pin，并用页面元素锚点和百分比坐标降低布局变化后的漂移风险。新上线的版本记录会把评论留在对应迭代上，避免 AI 快速改版后反馈失去上下文。",
+        action: "把一个可访问原型生成评审链接，请同事只用点击批注反馈；下一版更新后检查未解决项是否仍能准确定位到原先页面状态。",
+        url: "https://www.leaveadot.com"
+      }
+    ]
   }
 ];
 
 const state = {
   mode: "featured",
-  issueId: issues[0].id,
+  issueId: "2026-W30",
   activeIndex: 0,
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   isMobile: window.matchMedia("(max-width: 760px)").matches
