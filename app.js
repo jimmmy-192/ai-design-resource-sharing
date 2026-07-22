@@ -150,8 +150,13 @@ const issueSelect = document.querySelector("#issueSelect");
 const issueSelectWrap = document.querySelector("#issueSelectWrap");
 const tabButtons = [...document.querySelectorAll(".tab-button")];
 
+function getLatestIssue() {
+  return issues[issues.length - 1];
+}
+
 function getCurrentIssue() {
-  return issues.find((issue) => issue.id === state.issueId) || issues[0];
+  if (state.mode === "featured") return getLatestIssue();
+  return issues.find((issue) => issue.id === state.issueId) || getLatestIssue();
 }
 
 function animateCardHover(card, index, hovered) {
@@ -306,11 +311,16 @@ function setActiveIndex(index) {
 
 function setMode(mode, animate = true) {
   state.mode = mode;
+  state.activeIndex = 0;
+  const issue = getCurrentIssue();
   pageTitle.textContent = mode === "featured" ? "本期精选" : "所有案例";
+  issueLabel.textContent = issue.range;
+  issueSelect.value = state.issueId;
   issueSelectWrap.classList.toggle("is-hidden", mode !== "all");
   tabButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.mode === mode);
   });
+  renderCards();
 
   if (animate && window.gsap && !state.reduceMotion) {
     gsap.fromTo(
@@ -374,6 +384,5 @@ if (window.gsap) {
   );
 }
 
-renderCards();
 setMode("featured", false);
 bootAnimation();
