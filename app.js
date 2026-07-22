@@ -130,6 +130,18 @@ const issues = [
           "它允许评审者直接在页面任意位置留下 pin，并用页面元素锚点和百分比坐标降低布局变化后的漂移风险。新上线的版本记录会把评论留在对应迭代上，避免 AI 快速改版后反馈失去上下文。",
         action: "把一个可访问原型生成评审链接，请同事只用点击批注反馈；下一版更新后检查未解决项是否仍能准确定位到原先页面状态。",
         url: "https://www.leaveadot.com"
+      },
+      {
+        title: "ITom Dev 3D Gallery",
+        category: "创意开发案例",
+        score: "14/15",
+        coverImage: "./assets/covers/itom-gallery.jpg",
+        visualLabel: "3D Corridor",
+        summary: "把作品集导航做成一条可探索的手绘 3D 走廊，让项目入口成为空间叙事的一部分。",
+        description:
+          "这个作品集用 WebGL、Three.js、React Three Fiber 和 GSAP 构成可交互场景，并以门、展厅和走廊承载作品、简介与联系入口。它提供了一个有完成度的样本，用来研究沉浸式视觉如何仍然服务于信息架构。",
+        action: "先把一个普通作品集的信息拆成“入口、项目、关于、联系”四个空间节点，再判断哪些交互能提升探索感，哪些必须保留直接可见的文字入口。",
+        url: "https://itomdev.com/gallery"
       }
     ]
   }
