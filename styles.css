@@ -209,7 +209,7 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 720;
 }
 
@@ -245,7 +245,7 @@ h1 {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  font-size: clamp(24px, 3.2vw, 32px);
+  font-size: clamp(26px, 3.4vw, 34px);
   font-weight: 790;
   line-height: 1.05;
   -webkit-box-orient: vertical;
@@ -275,13 +275,13 @@ h1 {
 
 .card-summary {
   display: -webkit-box;
-  min-height: 45px;
+  min-height: 48px;
   margin: 0;
   overflow: hidden;
   color: #26302b;
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.5;
+  font-size: 16px;
+  font-weight: 680;
+  line-height: 1.52;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -297,12 +297,12 @@ h1 {
 
 .card-description {
   display: -webkit-box;
-  min-height: 68px;
+  min-height: 72px;
   margin: 0;
   overflow: hidden;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.58;
+  font-size: 15px;
+  line-height: 1.6;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
 }
@@ -314,8 +314,8 @@ h1 {
   max-height: 80px;
   overflow: hidden;
   color: #39423d;
-  font-size: 14px;
-  line-height: 1.58;
+  font-size: 15px;
+  line-height: 1.62;
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -367,7 +367,7 @@ h1 {
   display: block;
   margin-bottom: 6px;
   color: var(--accent-2);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 780;
 }
 
@@ -467,12 +467,13 @@ h1 {
   }
 
   .card-summary {
+    font-size: 15px;
     -webkit-line-clamp: 2;
   }
 
   .resource-card .card-action {
     padding: 14px 21px 18px;
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
@@ -568,6 +569,6 @@ h1 {
   }
 
   .card-action {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
