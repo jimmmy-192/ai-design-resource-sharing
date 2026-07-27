@@ -1,0 +1,4 @@
+db.properties
+ai.properties
+__pycache__/
+*.pyc

@@ -1,0 +1,12 @@
+{
+  "schema": "cowork-project/v1",
+  "id": "cw_proj_dd6e90cta2",
+  "name": "ai-design-resource-sharing",
+  "srcDir": "/private/tmp/ai-design-resource-sharing-layout/cowork-app",
+  "createdAt": 1785145986105,
+  "updatedAt": 1785145986105,
+  "createdBy": "cowork-cli",
+  "stack": "fastapi-only",
+  "guardCompliant": true,
+  "description": "公司内部设计资源周刊，支持 SSO 用户头像、个人发布与收藏"
+}
