@@ -88,35 +88,127 @@ h1 {
   line-height: 0.98;
 }
 
-.issue-select {
+.issue-filter {
   position: relative;
-  display: inline-flex;
+  z-index: 2;
+}
+
+.issue-filter-button {
+  display: flex;
   align-items: center;
-}
-
-.issue-select::after {
-  position: absolute;
-  right: 18px;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  content: "";
-  border-right: 6px solid transparent;
-  border-left: 6px solid transparent;
-  border-top: 7px solid var(--ink);
-}
-
-.issue-select select {
+  justify-content: space-between;
+  gap: 18px;
   min-width: 194px;
   height: 48px;
-  padding: 0 46px 0 22px;
+  padding: 0 18px 0 22px;
   color: var(--ink);
   cursor: pointer;
-  appearance: none;
   background: rgba(255, 253, 247, 0.86);
   border: 1px solid var(--line);
   border-radius: 999px;
   box-shadow: var(--soft-shadow);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.issue-filter-button:hover,
+.issue-filter-button[aria-expanded="true"] {
+  background: var(--surface);
+  border-color: rgba(23, 33, 28, 0.2);
+}
+
+.issue-filter-button:focus-visible {
+  outline: 3px solid rgba(217, 101, 59, 0.62);
+  outline-offset: 3px;
+}
+
+.issue-filter-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: transform 180ms ease;
+}
+
+.issue-filter-button[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.issue-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  display: grid;
+  gap: 4px;
+  width: 260px;
+  padding: 8px;
+  pointer-events: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 160ms ease,
+    transform 180ms ease;
+}
+
+.issue-menu.is-open {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.issue-option {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  min-height: 54px;
+  padding: 9px 38px 9px 12px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+}
+
+.issue-option:hover {
+  background: rgba(22, 79, 70, 0.07);
+}
+
+.issue-option.is-selected {
+  color: var(--accent);
+  background: rgba(22, 79, 70, 0.1);
+}
+
+.issue-option.is-selected::after {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  font-size: 16px;
+  font-weight: 800;
+  content: "✓";
+  transform: translateY(-50%);
+}
+
+.issue-option span {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 720;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.issue-option small {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .layout-toggle {
@@ -559,13 +651,19 @@ body.is-masonry-view {
     width: 100%;
   }
 
-  .issue-select {
+  .issue-filter {
     flex: 1;
   }
 
-  .issue-select select {
+  .issue-filter-button {
     width: 100%;
     min-width: 0;
+  }
+
+  .issue-menu {
+    right: auto;
+    left: 0;
+    width: min(100%, 300px);
   }
 
   .stage {

@@ -150,7 +150,7 @@ const issues = [
 const state = {
   mode: "featured",
   layoutMode: "stack",
-  issueId: "2026-W30",
+  issueId: "all",
   activeIndex: 0,
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   isMobile: window.matchMedia("(max-width: 760px)").matches
@@ -159,8 +159,11 @@ const state = {
 const carousel = document.querySelector("#carousel");
 const pageTitle = document.querySelector("#pageTitle");
 const issueLabel = document.querySelector("#issueLabel");
-const issueSelect = document.querySelector("#issueSelect");
 const viewControls = document.querySelector("#viewControls");
+const issueFilter = document.querySelector("#issueFilter");
+const issueFilterButton = document.querySelector("#issueFilterButton");
+const issueFilterValue = document.querySelector("#issueFilterValue");
+const issueMenu = document.querySelector("#issueMenu");
 const layoutToggle = document.querySelector("#layoutToggle");
 const appShell = document.querySelector(".app-shell");
 const stage = document.querySelector(".stage");
@@ -170,9 +173,86 @@ function getLatestIssue() {
   return issues[issues.length - 1];
 }
 
-function getCurrentIssue() {
-  if (state.mode === "featured") return getLatestIssue();
+function getSelectedIssue() {
   return issues.find((issue) => issue.id === state.issueId) || getLatestIssue();
+}
+
+function getAllResources() {
+  return [...issues].reverse().flatMap((issue) => issue.resources);
+}
+
+function getCurrentResources() {
+  if (state.mode === "featured") return getLatestIssue().resources;
+  if (state.issueId === "all") return getAllResources();
+  return getSelectedIssue().resources;
+}
+
+function getCurrentRange() {
+  if (state.mode === "featured") return getLatestIssue().range;
+  if (state.issueId === "all") return `全部期次 / ${getAllResources().length} 个案例`;
+  return getSelectedIssue().range;
+}
+
+function closeIssueMenu() {
+  issueMenu.classList.remove("is-open");
+  issueFilterButton.setAttribute("aria-expanded", "false");
+}
+
+function updateIssueFilterUI() {
+  const allSelected = state.issueId === "all";
+  const selectedIssue = allSelected ? null : getSelectedIssue();
+  issueFilterValue.textContent = allSelected ? "全部" : selectedIssue.label;
+
+  issueMenu.querySelectorAll(".issue-option").forEach((option) => {
+    const selected = option.dataset.issueId === state.issueId;
+    option.classList.toggle("is-selected", selected);
+    option.setAttribute("aria-selected", String(selected));
+  });
+}
+
+function renderIssueMenu() {
+  const options = [
+    {
+      id: "all",
+      label: "全部",
+      meta: `${getAllResources().length} 个案例`
+    },
+    ...[...issues].reverse().map((issue) => ({
+      id: issue.id,
+      label: issue.label,
+      meta: `${issue.resources.length} 个案例`
+    }))
+  ];
+
+  issueMenu.innerHTML = options
+    .map(
+      (option) => `
+        <button
+          class="issue-option"
+          type="button"
+          role="option"
+          data-issue-id="${option.id}"
+          aria-selected="false"
+        >
+          <span>${option.label}</span>
+          <small>${option.meta}</small>
+        </button>
+      `
+    )
+    .join("");
+
+  issueMenu.querySelectorAll(".issue-option").forEach((option) => {
+    option.addEventListener("click", () => {
+      state.issueId = option.dataset.issueId;
+      state.activeIndex = 0;
+      issueLabel.textContent = getCurrentRange();
+      updateIssueFilterUI();
+      closeIssueMenu();
+      renderCards();
+    });
+  });
+
+  updateIssueFilterUI();
 }
 
 function isMasonryMode() {
@@ -208,7 +288,7 @@ function animateCardHover(card, index, hovered) {
     return;
   }
 
-  const total = getCurrentIssue().resources.length;
+  const total = getCurrentResources().length;
   const distance = Math.abs(getOffset(index, state.activeIndex, total));
   const baseY = distance === 0 ? 0 : 14;
   const baseScale = distance === 0 ? 1 : distance === 1 ? 0.76 : 0.52;
@@ -280,7 +360,7 @@ function makeCard(resource, index) {
 }
 
 function renderCards() {
-  const resources = getCurrentIssue().resources;
+  const resources = getCurrentResources();
   carousel.innerHTML = "";
   resources.forEach((resource, index) => {
     carousel.appendChild(makeCard(resource, index));
@@ -376,7 +456,7 @@ function layoutCards(isInitial = false) {
 
 function setActiveIndex(index) {
   if (isMasonryMode()) return;
-  const total = getCurrentIssue().resources.length;
+  const total = getCurrentResources().length;
   state.activeIndex = (index + total) % total;
   layoutCards();
 }
@@ -384,10 +464,11 @@ function setActiveIndex(index) {
 function setMode(mode, animate = true) {
   state.mode = mode;
   state.activeIndex = 0;
-  const issue = getCurrentIssue();
+  if (mode === "all") state.issueId = "all";
   pageTitle.textContent = mode === "featured" ? "本期精选" : "所有案例";
-  issueLabel.textContent = issue.range;
-  issueSelect.value = state.issueId;
+  issueLabel.textContent = getCurrentRange();
+  updateIssueFilterUI();
+  closeIssueMenu();
   viewControls.classList.toggle("is-hidden", mode !== "all");
   tabButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.mode === mode);
@@ -476,12 +557,21 @@ tabButtons.forEach((button) => {
   button.addEventListener("click", () => setMode(button.dataset.mode));
 });
 
-issueSelect.addEventListener("change", (event) => {
-  state.issueId = event.target.value;
-  const issue = getCurrentIssue();
-  issueLabel.textContent = issue.range;
-  state.activeIndex = 0;
-  renderCards();
+issueFilterButton.addEventListener("click", () => {
+  const open = !issueMenu.classList.contains("is-open");
+  issueMenu.classList.toggle("is-open", open);
+  issueFilterButton.setAttribute("aria-expanded", String(open));
+});
+
+document.addEventListener("click", (event) => {
+  if (!issueFilter.contains(event.target)) closeIssueMenu();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeIssueMenu();
+    issueFilterButton.focus();
+  }
 });
 
 layoutToggle.addEventListener("click", () => {
@@ -515,5 +605,6 @@ if (window.gsap) {
   );
 }
 
+renderIssueMenu();
 setMode("featured", false);
 bootAnimation();
