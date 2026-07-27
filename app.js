@@ -157,6 +157,11 @@ const state = {
   sessionState: "loading",
   favoriteIds: new Set(),
   publications: [],
+  commentCounts: new Map(),
+  comments: [],
+  commentResource: null,
+  replyingTo: null,
+  commentsState: "idle",
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   isMobile: window.matchMedia("(max-width: 760px)").matches
 };
@@ -184,6 +189,18 @@ const profileContent = document.querySelector("#profileContent");
 const publishedCount = document.querySelector("#publishedCount");
 const favoritesCount = document.querySelector("#favoritesCount");
 const profileTabButtons = [...document.querySelectorAll(".profile-tab")];
+const commentLayer = document.querySelector("#commentLayer");
+const commentBackdrop = document.querySelector("#commentBackdrop");
+const commentClose = document.querySelector("#commentClose");
+const commentResourceLabel = document.querySelector("#commentResourceLabel");
+const commentDrawerTitle = document.querySelector("#commentDrawerTitle");
+const commentList = document.querySelector("#commentList");
+const commentForm = document.querySelector("#commentForm");
+const commentInput = document.querySelector("#commentInput");
+const commentSubmit = document.querySelector("#commentSubmit");
+const replyingTo = document.querySelector("#replyingTo");
+const replyingToText = document.querySelector("#replyingToText");
+const cancelReply = document.querySelector("#cancelReply");
 
 function getLatestIssue() {
   return issues[issues.length - 1];
@@ -296,13 +313,16 @@ async function loadMemberData() {
     state.sessionState = "ready";
     updateSessionUI();
 
-    const [favoritesPayload, publicationsPayload] = await Promise.all([
+    const [favoritesPayload, publicationsPayload, commentCountsPayload] = await Promise.all([
       requestJson("/api/favorites"),
-      requestJson("/api/publications")
+      requestJson("/api/publications"),
+      requestJson("/api/comment-counts")
     ]);
     state.favoriteIds = new Set(favoritesPayload.resourceIds || []);
     state.publications = publicationsPayload.publications || [];
+    state.commentCounts = new Map(Object.entries(commentCountsPayload.counts || {}));
     syncFavoriteButtons();
+    syncCommentButtons();
     renderProfile();
   } catch (error) {
     state.sessionState = "unavailable";
@@ -351,6 +371,20 @@ function syncFavoriteButtons() {
   });
   favoritesCount.textContent = String(state.favoriteIds.size);
   publishedCount.textContent = String(state.publications.length);
+}
+
+function updateCommentButton(button, resourceId) {
+  const count = Number(state.commentCounts.get(resourceId) || 0);
+  const badge = button.querySelector(".comment-count");
+  badge.textContent = count > 99 ? "99+" : String(count);
+  badge.hidden = count === 0;
+  button.setAttribute("aria-label", count ? `查看 ${count} 条评论` : "查看评论");
+}
+
+function syncCommentButtons() {
+  document.querySelectorAll(".comment-button").forEach((button) => {
+    updateCommentButton(button, button.dataset.resourceId);
+  });
 }
 
 function makeProfileResourceCard(resource, options = {}) {
@@ -452,6 +486,220 @@ function renderProfile() {
     grid.appendChild(makeProfileResourceCard(resource, { removable: state.profileTab === "favorites" }));
   });
   profileContent.replaceChildren(grid);
+}
+
+function formatCommentTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function createCommentAvatar(comment) {
+  const avatar = document.createElement("div");
+  avatar.className = "comment-avatar";
+  if (comment.avatar) {
+    const image = document.createElement("img");
+    image.src = comment.avatar;
+    image.alt = "";
+    image.referrerPolicy = "no-referrer";
+    avatar.appendChild(image);
+  } else {
+    avatar.textContent = getDisplayInitials(comment.displayName);
+  }
+  return avatar;
+}
+
+function startReply(comment) {
+  state.replyingTo = comment;
+  replyingTo.classList.remove("is-hidden");
+  replyingToText.textContent = `回复 ${comment.displayName}`;
+  commentInput.placeholder = `回复 ${comment.displayName}`;
+  commentInput.focus();
+}
+
+function clearReply() {
+  state.replyingTo = null;
+  replyingTo.classList.add("is-hidden");
+  replyingToText.textContent = "";
+  commentInput.placeholder = "写下你的看法";
+}
+
+function createCommentItem(comment, childrenByParent, depth = 0) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "comment-thread";
+  if (depth > 0) wrapper.classList.add("is-reply");
+
+  const item = document.createElement("article");
+  item.className = "comment-item";
+
+  const body = document.createElement("div");
+  body.className = "comment-body";
+
+  const meta = document.createElement("div");
+  meta.className = "comment-meta";
+
+  const name = document.createElement("strong");
+  name.textContent = comment.displayName;
+
+  const time = document.createElement("time");
+  time.dateTime = comment.createdAt;
+  time.textContent = formatCommentTime(comment.createdAt);
+
+  const content = document.createElement("p");
+  content.textContent = comment.content;
+
+  const replyButton = document.createElement("button");
+  replyButton.className = "comment-reply";
+  replyButton.type = "button";
+  replyButton.textContent = "回复";
+  replyButton.addEventListener("click", () => startReply(comment));
+
+  meta.append(name, time);
+  body.append(meta, content, replyButton);
+  item.append(createCommentAvatar(comment), body);
+  wrapper.appendChild(item);
+
+  const children = childrenByParent.get(String(comment.id)) || [];
+  children.forEach((child) => {
+    wrapper.appendChild(createCommentItem(child, childrenByParent, depth + 1));
+  });
+  return wrapper;
+}
+
+function renderCommentMessage(title, description) {
+  const empty = document.createElement("div");
+  empty.className = "comment-empty";
+  const heading = document.createElement("h3");
+  heading.textContent = title;
+  const copy = document.createElement("p");
+  copy.textContent = description;
+  empty.append(heading, copy);
+  commentList.replaceChildren(empty);
+}
+
+function renderComments() {
+  if (state.commentsState === "loading") {
+    renderCommentMessage("正在读取评论", "评论加载后会显示在这里。");
+    return;
+  }
+
+  if (state.commentsState === "unavailable") {
+    renderCommentMessage("需要内部身份", "请从 Cowork 内部版本打开，系统会自动识别你的 Hi 身份。");
+    return;
+  }
+
+  if (!state.comments.length) {
+    renderCommentMessage("还没有评论", "成为第一个分享看法的人。");
+    return;
+  }
+
+  const childrenByParent = new Map();
+  const roots = [];
+  state.comments.forEach((comment) => {
+    if (comment.parentId == null) {
+      roots.push(comment);
+      return;
+    }
+    const key = String(comment.parentId);
+    if (!childrenByParent.has(key)) childrenByParent.set(key, []);
+    childrenByParent.get(key).push(comment);
+  });
+
+  const fragment = document.createDocumentFragment();
+  roots.forEach((comment) => {
+    fragment.appendChild(createCommentItem(comment, childrenByParent));
+  });
+  commentList.replaceChildren(fragment);
+}
+
+async function loadComments(resource) {
+  state.commentsState = "loading";
+  renderComments();
+
+  if (state.sessionState !== "ready") {
+    state.commentsState = "unavailable";
+    renderComments();
+    return;
+  }
+
+  try {
+    const resourceId = getResourceId(resource);
+    const payload = await requestJson(`/api/comments/${encodeURIComponent(resourceId)}`);
+    state.comments = payload.comments || [];
+    state.commentsState = "ready";
+    state.commentCounts.set(resourceId, Number(payload.count || state.comments.length));
+    syncCommentButtons();
+    renderComments();
+  } catch (error) {
+    state.commentsState = "unavailable";
+    renderComments();
+  }
+}
+
+function openComments(resource) {
+  state.commentResource = resource;
+  state.comments = [];
+  clearReply();
+  commentInput.value = "";
+  commentResourceLabel.textContent = resource.category;
+  commentDrawerTitle.textContent = resource.title;
+  commentLayer.classList.add("is-open");
+  commentLayer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("is-comment-open");
+  document.querySelectorAll(".comment-button").forEach((button) => {
+    button.setAttribute(
+      "aria-expanded",
+      String(button.dataset.resourceId === getResourceId(resource))
+    );
+  });
+  const canComment = state.sessionState === "ready";
+  commentInput.disabled = !canComment;
+  commentSubmit.disabled = !canComment;
+  loadComments(resource);
+}
+
+function closeComments() {
+  commentLayer.classList.remove("is-open");
+  commentLayer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("is-comment-open");
+  document.querySelectorAll(".comment-button").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+  });
+  clearReply();
+}
+
+async function submitComment(event) {
+  event.preventDefault();
+  if (state.sessionState !== "ready" || !state.commentResource) return;
+
+  const content = commentInput.value.trim();
+  if (!content) {
+    commentInput.focus();
+    return;
+  }
+
+  commentSubmit.disabled = true;
+  try {
+    const resourceId = getResourceId(state.commentResource);
+    await requestJson(`/api/comments/${encodeURIComponent(resourceId)}`, {
+      method: "POST",
+      body: JSON.stringify({
+        content,
+        parentId: state.replyingTo?.id ?? null
+      })
+    });
+    commentInput.value = "";
+    clearReply();
+    await loadComments(state.commentResource);
+    commentList.scrollTo({ top: commentList.scrollHeight, behavior: "smooth" });
+  } finally {
+    commentSubmit.disabled = false;
+  }
 }
 
 function closeIssueMenu() {
@@ -580,6 +828,12 @@ function makeCard(resource, index) {
           <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"></path>
         </svg>
       </button>
+      <button class="comment-button" type="button" aria-label="查看评论" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+        </svg>
+        <span class="comment-count" hidden>0</span>
+      </button>
     </div>
     <div class="card-body">
       <div class="card-meta">
@@ -604,6 +858,14 @@ function makeCard(resource, index) {
   favoriteButton.addEventListener("click", (event) => {
     event.stopPropagation();
     toggleFavorite(resource, favoriteButton);
+  });
+
+  const commentButton = article.querySelector(".comment-button");
+  commentButton.dataset.resourceId = getResourceId(resource);
+  updateCommentButton(commentButton, getResourceId(resource));
+  commentButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openComments(resource);
   });
 
   article.addEventListener("click", (event) => {
@@ -656,6 +918,7 @@ function layoutCards(isInitial = false) {
   if (isMasonryMode()) {
     cards.forEach((card) => {
       card.classList.remove("is-side", "is-far", "is-hovered");
+      card.dataset.active = "false";
       card.setAttribute("aria-hidden", "false");
       card.tabIndex = -1;
       card.style.zIndex = "";
@@ -702,6 +965,7 @@ function layoutCards(isInitial = false) {
     card.classList.toggle("is-side", distance === 1);
     card.classList.toggle("is-far", distance > 1);
     card.classList.toggle("is-hovered", hovered);
+    card.dataset.active = String(distance === 0);
     card.setAttribute("aria-hidden", visible ? "false" : "true");
     card.tabIndex = visible ? 0 : -1;
     card.style.zIndex = String(zIndex);
@@ -736,9 +1000,11 @@ function setActiveIndex(index) {
 }
 
 function setMode(mode, animate = true) {
+  if (commentLayer.classList.contains("is-open")) closeComments();
   state.mode = mode;
   state.activeIndex = 0;
   const profileMode = mode === "profile";
+  appShell.classList.toggle("is-featured-mode", mode === "featured");
 
   profileView.classList.toggle("is-hidden", !profileMode);
   stage.classList.toggle("is-hidden", profileMode);
@@ -875,10 +1141,19 @@ document.addEventListener("click", (event) => {
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (commentLayer.classList.contains("is-open")) {
+      closeComments();
+      return;
+    }
     closeIssueMenu();
     issueFilterButton.focus();
   }
 });
+
+commentBackdrop.addEventListener("click", closeComments);
+commentClose.addEventListener("click", closeComments);
+cancelReply.addEventListener("click", clearReply);
+commentForm.addEventListener("submit", submitComment);
 
 layoutToggle.addEventListener("click", () => {
   setLayoutMode(state.layoutMode === "masonry" ? "stack" : "masonry");

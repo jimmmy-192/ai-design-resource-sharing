@@ -9,10 +9,16 @@ import psycopg
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from psycopg.rows import dict_row
 
 
 BASE_DIR = Path(__file__).resolve().parent
+
+
+class CommentCreate(BaseModel):
+    content: str
+    parentId: Optional[int] = None
 
 
 def _load_props(path: str) -> dict[str, str]:
@@ -88,6 +94,18 @@ def _upsert_user(conn: psycopg.Connection, user: dict) -> None:
         """,
         (user["userId"], user["email"], user["displayName"], user["avatar"]),
     )
+
+
+def _serialize_comment(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "resourceId": row["resource_id"],
+        "parentId": row["parent_id"],
+        "content": row["content"],
+        "displayName": row["display_name"],
+        "avatar": row["avatar_url"],
+        "createdAt": row["created_at"].isoformat(),
+    }
 
 
 app = FastAPI(title="AI Design Resource Sharing")
@@ -217,3 +235,98 @@ def list_publications(
         for row in rows
     ]
     return JSONResponse({"publications": publications})
+
+
+@app.get("/api/comment-counts")
+def list_comment_counts(
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        rows = conn.execute(
+            """
+            SELECT resource_id, COUNT(*) AS comment_count
+            FROM comments
+            GROUP BY resource_id
+            """
+        ).fetchall()
+        conn.commit()
+
+    return JSONResponse(
+        {"counts": {row["resource_id"]: row["comment_count"] for row in rows}}
+    )
+
+
+@app.get("/api/comments/{resource_id}")
+def list_comments(
+    resource_id: str,
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    clean_resource_id = resource_id.strip()
+    if not clean_resource_id or len(clean_resource_id) > 240:
+        raise HTTPException(status_code=400, detail="invalid resource id")
+
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        rows = conn.execute(
+            """
+            SELECT
+              c.id,
+              c.resource_id,
+              c.parent_id,
+              c.content,
+              c.created_at,
+              u.display_name,
+              u.avatar_url
+            FROM comments AS c
+            JOIN app_users AS u ON u.sso_id = c.owner_id
+            WHERE c.resource_id = %s
+            ORDER BY c.created_at ASC, c.id ASC
+            """,
+            (clean_resource_id,),
+        ).fetchall()
+        conn.commit()
+
+    comments = [_serialize_comment(row) for row in rows]
+    return JSONResponse({"comments": comments, "count": len(comments)})
+
+
+@app.post("/api/comments/{resource_id}", status_code=201)
+def create_comment(
+    resource_id: str,
+    payload: CommentCreate,
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    clean_resource_id = resource_id.strip()
+    content = payload.content.strip()
+    if not clean_resource_id or len(clean_resource_id) > 240:
+        raise HTTPException(status_code=400, detail="invalid resource id")
+    if not content or len(content) > 1000:
+        raise HTTPException(status_code=400, detail="comment must be 1-1000 characters")
+
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        if payload.parentId is not None:
+            parent = conn.execute(
+                "SELECT resource_id FROM comments WHERE id = %s",
+                (payload.parentId,),
+            ).fetchone()
+            if not parent or parent["resource_id"] != clean_resource_id:
+                raise HTTPException(status_code=400, detail="invalid parent comment")
+
+        row = conn.execute(
+            """
+            INSERT INTO comments (resource_id, owner_id, parent_id, content)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id, resource_id, parent_id, content, created_at
+            """,
+            (clean_resource_id, user["userId"], payload.parentId, content),
+        ).fetchone()
+        conn.commit()
+
+    row["display_name"] = user["displayName"]
+    row["avatar_url"] = user["avatar"]
+    return JSONResponse(_serialize_comment(row), status_code=201)

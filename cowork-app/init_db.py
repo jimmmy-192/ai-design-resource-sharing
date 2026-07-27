@@ -51,6 +51,19 @@ CREATE TABLE IF NOT EXISTS publications (
 );
 CREATE INDEX IF NOT EXISTS idx_publications_owner_created
 ON publications (owner_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id          BIGSERIAL PRIMARY KEY,
+    resource_id TEXT        NOT NULL,
+    owner_id    TEXT        NOT NULL,
+    parent_id   BIGINT      REFERENCES comments(id) ON DELETE CASCADE,
+    content     TEXT        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_comments_resource_created
+ON comments (resource_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_comments_parent
+ON comments (parent_id);
 """
 
 
