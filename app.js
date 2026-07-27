@@ -149,6 +149,7 @@ const issues = [
 
 const state = {
   mode: "featured",
+  layoutMode: "stack",
   issueId: "2026-W30",
   activeIndex: 0,
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -159,7 +160,10 @@ const carousel = document.querySelector("#carousel");
 const pageTitle = document.querySelector("#pageTitle");
 const issueLabel = document.querySelector("#issueLabel");
 const issueSelect = document.querySelector("#issueSelect");
-const issueSelectWrap = document.querySelector("#issueSelectWrap");
+const viewControls = document.querySelector("#viewControls");
+const layoutToggle = document.querySelector("#layoutToggle");
+const appShell = document.querySelector(".app-shell");
+const stage = document.querySelector(".stage");
 const tabButtons = [...document.querySelectorAll(".tab-button")];
 
 function getLatestIssue() {
@@ -171,8 +175,38 @@ function getCurrentIssue() {
   return issues.find((issue) => issue.id === state.issueId) || getLatestIssue();
 }
 
+function isMasonryMode() {
+  return state.mode === "all" && state.layoutMode === "masonry";
+}
+
+function updateLayoutUI() {
+  const masonry = isMasonryMode();
+  document.body.classList.toggle("is-masonry-view", masonry);
+  appShell.classList.toggle("is-masonry-view", masonry);
+  stage.classList.toggle("is-masonry-view", masonry);
+  carousel.classList.toggle("is-masonry-view", masonry);
+  layoutToggle.classList.toggle("is-masonry-active", masonry);
+  layoutToggle.setAttribute("aria-pressed", String(masonry));
+
+  const label = masonry ? "切换为叠放排列" : "切换为瀑布流排列";
+  layoutToggle.setAttribute("aria-label", label);
+  layoutToggle.title = label;
+}
+
 function animateCardHover(card, index, hovered) {
   if (!window.gsap || state.reduceMotion || state.isMobile || card.getAttribute("aria-hidden") === "true") return;
+
+  if (isMasonryMode()) {
+    card.classList.toggle("is-hovered", hovered);
+    gsap.to(card, {
+      y: hovered ? -6 : 0,
+      scale: hovered ? 1.01 : 1,
+      duration: hovered ? 0.22 : 0.28,
+      ease: "power2.out",
+      overwrite: "auto"
+    });
+    return;
+  }
 
   const total = getCurrentIssue().resources.length;
   const distance = Math.abs(getOffset(index, state.activeIndex, total));
@@ -220,11 +254,13 @@ function makeCard(resource, index) {
 
   article.addEventListener("click", (event) => {
     if (event.target.closest("a")) return;
+    if (isMasonryMode()) return;
     setActiveIndex(index);
   });
 
   article.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
+      if (isMasonryMode()) return;
       event.preventDefault();
       setActiveIndex(index);
     }
@@ -261,6 +297,29 @@ function getOffset(index, active, total) {
 
 function layoutCards(isInitial = false) {
   const cards = [...carousel.querySelectorAll(".resource-card")];
+  updateLayoutUI();
+
+  if (isMasonryMode()) {
+    cards.forEach((card) => {
+      card.classList.remove("is-side", "is-far", "is-hovered");
+      card.setAttribute("aria-hidden", "false");
+      card.tabIndex = -1;
+      card.style.zIndex = "";
+    });
+
+    if (window.gsap) {
+      gsap.killTweensOf(cards);
+      gsap.set(cards, { clearProps: "transform,opacity,visibility" });
+    } else {
+      cards.forEach((card) => {
+        card.style.transform = "";
+        card.style.opacity = "";
+        card.style.visibility = "";
+      });
+    }
+    return;
+  }
+
   const total = cards.length;
   const stageWidth = carousel.clientWidth || window.innerWidth;
   const cardWidth = cards[0]?.offsetWidth || 392;
@@ -316,6 +375,7 @@ function layoutCards(isInitial = false) {
 }
 
 function setActiveIndex(index) {
+  if (isMasonryMode()) return;
   const total = getCurrentIssue().resources.length;
   state.activeIndex = (index + total) % total;
   layoutCards();
@@ -328,7 +388,7 @@ function setMode(mode, animate = true) {
   pageTitle.textContent = mode === "featured" ? "本期精选" : "所有案例";
   issueLabel.textContent = issue.range;
   issueSelect.value = state.issueId;
-  issueSelectWrap.classList.toggle("is-hidden", mode !== "all");
+  viewControls.classList.toggle("is-hidden", mode !== "all");
   tabButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.mode === mode);
   });
@@ -340,6 +400,60 @@ function setMode(mode, animate = true) {
       { autoAlpha: 0, y: 16 },
       { autoAlpha: 1, y: 0, duration: 0.42, ease: "power2.out", stagger: 0.05, overwrite: "auto" }
     );
+  }
+}
+
+function setLayoutMode(layoutMode) {
+  const cards = [...carousel.querySelectorAll(".resource-card")];
+  const applyLayout = () => {
+    state.layoutMode = layoutMode;
+    layoutCards(true);
+
+    if (window.gsap && !state.reduceMotion) {
+      if (isMasonryMode()) {
+        gsap.fromTo(
+          cards,
+          { autoAlpha: 0, y: 14 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.38,
+            ease: "power2.out",
+            stagger: { amount: 0.16, from: "start" },
+            overwrite: "auto",
+            clearProps: "transform,opacity,visibility"
+          }
+        );
+      } else {
+        const visibleCards = cards.filter((card) => card.getAttribute("aria-hidden") === "false");
+        gsap.fromTo(
+          visibleCards,
+          { autoAlpha: 0 },
+          {
+            autoAlpha: 1,
+            duration: 0.38,
+            ease: "power2.out",
+            stagger: { amount: 0.16, from: "center" },
+            overwrite: "auto",
+            clearProps: "opacity,visibility"
+          }
+        );
+      }
+    }
+  };
+
+  if (window.gsap && !state.reduceMotion) {
+    gsap.to(cards, {
+      autoAlpha: 0,
+      y: 8,
+      duration: 0.16,
+      ease: "power1.in",
+      stagger: { amount: 0.08, from: "center" },
+      overwrite: "auto",
+      onComplete: applyLayout
+    });
+  } else {
+    applyLayout();
   }
 }
 
@@ -370,7 +484,12 @@ issueSelect.addEventListener("change", (event) => {
   renderCards();
 });
 
+layoutToggle.addEventListener("click", () => {
+  setLayoutMode(state.layoutMode === "masonry" ? "stack" : "masonry");
+});
+
 window.addEventListener("keydown", (event) => {
+  if (isMasonryMode()) return;
   if (event.key === "ArrowRight") setActiveIndex(state.activeIndex + 1);
   if (event.key === "ArrowLeft") setActiveIndex(state.activeIndex - 1);
 });

@@ -67,6 +67,13 @@ select {
   margin: 0 auto;
 }
 
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 .eyebrow {
   margin: 0 0 10px;
   color: var(--accent-2);
@@ -85,7 +92,6 @@ h1 {
   position: relative;
   display: inline-flex;
   align-items: center;
-  margin-top: 4px;
 }
 
 .issue-select::after {
@@ -113,6 +119,55 @@ h1 {
   box-shadow: var(--soft-shadow);
 }
 
+.layout-toggle {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  color: var(--ink);
+  cursor: pointer;
+  background: rgba(255, 253, 247, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  box-shadow: var(--soft-shadow);
+  place-items: center;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.layout-toggle:hover {
+  color: var(--surface);
+  background: var(--ink);
+  transform: translateY(-2px);
+}
+
+.layout-toggle:focus-visible {
+  outline: 3px solid rgba(217, 101, 59, 0.62);
+  outline-offset: 3px;
+}
+
+.layout-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.layout-icon-stack,
+.layout-toggle.is-masonry-active .layout-icon-masonry {
+  display: none;
+}
+
+.layout-toggle.is-masonry-active .layout-icon-stack {
+  display: block;
+}
+
 .is-hidden {
   display: none;
 }
@@ -128,6 +183,64 @@ h1 {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
+}
+
+body.is-masonry-view {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app-shell.is-masonry-view {
+  grid-template-rows: auto auto;
+  height: auto;
+  min-height: 100vh;
+  padding-bottom: 130px;
+  overflow: visible;
+}
+
+.stage.is-masonry-view {
+  min-height: 0;
+}
+
+.carousel.is-masonry-view {
+  position: relative;
+  inset: auto;
+  columns: 3 340px;
+  column-gap: 24px;
+  transform-style: flat;
+}
+
+.carousel.is-masonry-view .resource-card {
+  position: relative;
+  top: auto;
+  left: auto;
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0 0 24px;
+  cursor: default;
+  break-inside: avoid;
+  transform: none;
+  box-shadow: var(--soft-shadow);
+}
+
+.carousel.is-masonry-view .cover img {
+  height: auto;
+  object-fit: contain;
+}
+
+.carousel.is-masonry-view .card-body {
+  grid-template-rows: auto auto minmax(150px, auto);
+}
+
+.carousel.is-masonry-view .card-title {
+  font-size: 28px;
+}
+
+.carousel.is-masonry-view .card-details {
+  min-height: 150px;
 }
 
 .resource-card {
@@ -442,8 +555,17 @@ h1 {
     gap: 18px;
   }
 
+  .view-controls {
+    width: 100%;
+  }
+
+  .issue-select {
+    flex: 1;
+  }
+
   .issue-select select {
     width: 100%;
+    min-width: 0;
   }
 
   .stage {
@@ -474,6 +596,15 @@ h1 {
   .resource-card .card-action {
     padding: 14px 21px 18px;
     font-size: 14px;
+  }
+
+  .carousel.is-masonry-view {
+    columns: 1;
+  }
+
+  .carousel.is-masonry-view .resource-card {
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -512,6 +643,10 @@ h1 {
 
   .resource-card .card-action {
     padding: 14px 20px 18px;
+  }
+
+  .carousel.is-masonry-view {
+    columns: 2 320px;
   }
 }
 
