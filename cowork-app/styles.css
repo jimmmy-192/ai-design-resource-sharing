@@ -453,45 +453,51 @@ body.is-masonry-view {
 }
 
 .comment-button {
-  position: absolute;
-  z-index: 2;
-  top: 16px;
-  right: 62px;
-  display: grid;
-  width: 38px;
-  height: 38px;
-  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
   color: var(--ink);
-  pointer-events: none;
   cursor: pointer;
-  visibility: hidden;
-  background: rgba(255, 253, 247, 0.94);
-  border: 1px solid rgba(23, 33, 28, 0.12);
-  border-radius: 50%;
-  box-shadow: 0 8px 18px rgba(34, 29, 20, 0.14);
-  opacity: 0;
-  transform: translateY(-4px);
-  place-items: center;
+  background: rgba(22, 79, 70, 0.05);
+  border: 1px solid rgba(22, 79, 70, 0.14);
+  border-radius: 6px;
   transition:
     color 180ms ease,
     background 180ms ease,
-    opacity 180ms ease,
-    transform 180ms ease,
-    visibility 180ms ease;
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 
 .app-shell.is-featured-mode .resource-card[data-active="true"] .comment-button {
-  pointer-events: auto;
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0);
+  display: flex;
 }
 
 .comment-button:hover,
 .comment-button[aria-expanded="true"] {
   color: var(--surface);
   background: var(--ink);
-  transform: translateY(-2px);
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.comment-button-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.comment-icon-wrap {
+  position: relative;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
 }
 
 .comment-button svg {
@@ -506,20 +512,36 @@ body.is-masonry-view {
 
 .comment-count {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -8px;
+  right: -10px;
   display: grid;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 760;
   line-height: 1;
   background: var(--accent-2);
-  border: 2px solid var(--surface);
+  border: 2px solid #f4f5f1;
   border-radius: 999px;
   place-items: center;
+}
+
+.comment-button:hover .comment-count,
+.comment-button[aria-expanded="true"] .comment-count {
+  border-color: var(--ink);
+}
+
+.comment-button-hint {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.comment-button:hover .comment-button-hint,
+.comment-button[aria-expanded="true"] .comment-button-hint {
+  color: rgba(255, 253, 247, 0.72);
 }
 
 .comment-count[hidden] {
@@ -529,7 +551,7 @@ body.is-masonry-view {
 .card-body {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 12px;
   padding: 24px;
 }
@@ -1087,30 +1109,34 @@ body.is-comment-open {
   height: 100%;
   padding: 0;
   cursor: default;
-  background: rgba(23, 33, 28, 0.18);
+  background: rgba(23, 33, 28, 0.22);
   border: 0;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
 }
 
 .comment-drawer {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 50%;
+  left: 50%;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  width: min(440px, 100vw);
-  height: 100%;
+  width: min(680px, calc(100vw - 48px));
+  height: min(680px, calc(100vh - 64px));
   overflow: hidden;
   background: var(--surface);
-  border-left: 1px solid var(--line);
-  border-radius: 8px 0 0 8px;
-  box-shadow: -24px 0 70px rgba(34, 29, 20, 0.2);
-  transform: translateX(100%);
-  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid rgba(23, 33, 28, 0.14);
+  border-radius: 8px;
+  box-shadow: 0 30px 90px rgba(34, 29, 20, 0.28);
+  opacity: 0;
+  transform: translate(-50%, -46%) scale(0.98);
+  transition:
+    opacity 200ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .comment-layer.is-open .comment-drawer {
-  transform: translateX(0);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .comment-drawer-header {
@@ -1520,9 +1546,9 @@ body.is-comment-open {
   }
 
   .comment-drawer {
-    width: 100%;
-    border-left: 0;
-    border-radius: 0;
+    width: calc(100% - 24px);
+    height: calc(100svh - 24px);
+    border-radius: 8px;
   }
 
   .comment-drawer-header {

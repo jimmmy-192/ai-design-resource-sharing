@@ -828,12 +828,6 @@ function makeCard(resource, index) {
           <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"></path>
         </svg>
       </button>
-      <button class="comment-button" type="button" aria-label="查看评论" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
-        </svg>
-        <span class="comment-count" hidden>0</span>
-      </button>
     </div>
     <div class="card-body">
       <div class="card-meta">
@@ -849,6 +843,18 @@ function makeCard(resource, index) {
         <p class="card-description">${resource.description}</p>
         <p class="card-action"><span>可以怎么用</span>${resource.action}</p>
       </div>
+      <button class="comment-button" type="button" aria-label="查看评论" aria-expanded="false">
+        <span class="comment-button-copy">
+          <span class="comment-icon-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+            </svg>
+            <span class="comment-count" hidden>0</span>
+          </span>
+          <span>评论</span>
+        </span>
+        <span class="comment-button-hint">查看讨论</span>
+      </button>
     </div>
   `;
 
