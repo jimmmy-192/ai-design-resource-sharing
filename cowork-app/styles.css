@@ -1591,6 +1591,11 @@ body.is-comment-open {
     height: clamp(450px, 62vh, 540px);
   }
 
+  .featured-comment-button {
+    top: calc(50% - clamp(24px, 2.5vh, 32px) + clamp(225px, 31vh, 270px) + 12px);
+    width: clamp(320px, 38vw, 400px);
+  }
+
   .card-body {
     gap: 10px;
     padding: 20px;
@@ -1634,6 +1639,11 @@ body.is-comment-open {
     width: clamp(390px, 22vw, 500px);
     height: clamp(520px, 56vh, 650px);
   }
+
+  .featured-comment-button {
+    top: calc(50% - clamp(24px, 2.5vh, 32px) + clamp(260px, 28vh, 325px) + 12px);
+    width: clamp(390px, 22vw, 500px);
+  }
 }
 
 @media (max-height: 760px) and (min-width: 761px) {
@@ -1651,6 +1661,10 @@ body.is-comment-open {
   .resource-card {
     grid-template-rows: minmax(170px, 48%) auto;
     height: min(460px, 63vh);
+  }
+
+  .featured-comment-button {
+    top: calc(50% - clamp(24px, 2.5vh, 32px) + min(230px, 31.5vh) + 12px);
   }
 
   .card-body {
