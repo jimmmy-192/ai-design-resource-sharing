@@ -462,8 +462,8 @@ body.is-masonry-view {
   padding: 0 14px;
   color: var(--ink);
   cursor: pointer;
-  background: rgba(22, 79, 70, 0.05);
-  border: 1px solid rgba(22, 79, 70, 0.14);
+  background: rgba(255, 253, 247, 0.96);
+  border: 1px solid rgba(23, 33, 28, 0.14);
   border-radius: 6px;
   transition:
     color 180ms ease,
@@ -478,7 +478,7 @@ body.is-masonry-view {
   top: calc(50% - clamp(24px, 2.5vh, 32px) + clamp(235px, 27vh, 295px) + 12px);
   left: 50%;
   width: clamp(340px, 23vw, 456px);
-  box-shadow: 0 10px 28px rgba(34, 29, 20, 0.12);
+  box-shadow: 0 8px 24px rgba(34, 29, 20, 0.1);
   transform: translateX(-50%);
 }
 
@@ -488,9 +488,9 @@ body.is-masonry-view {
 
 .comment-button:hover,
 .comment-button[aria-expanded="true"] {
-  color: var(--surface);
-  background: var(--ink);
-  border-color: var(--ink);
+  color: var(--ink);
+  background: #f1eee6;
+  border-color: rgba(22, 79, 70, 0.3);
 }
 
 .featured-comment-button:hover,
@@ -511,6 +511,7 @@ body.is-masonry-view {
   display: grid;
   width: 20px;
   height: 20px;
+  color: var(--accent);
   place-items: center;
 }
 
@@ -544,7 +545,7 @@ body.is-masonry-view {
 
 .comment-button:hover .comment-count,
 .comment-button[aria-expanded="true"] .comment-count {
-  border-color: var(--ink);
+  border-color: #f1eee6;
 }
 
 .comment-button-hint {
@@ -555,7 +556,7 @@ body.is-masonry-view {
 
 .comment-button:hover .comment-button-hint,
 .comment-button[aria-expanded="true"] .comment-button-hint {
-  color: rgba(255, 253, 247, 0.72);
+  color: var(--accent);
 }
 
 .comment-count[hidden] {
