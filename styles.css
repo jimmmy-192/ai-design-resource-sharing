@@ -847,9 +847,25 @@ body.is-masonry-view {
 .profile-avatar-placeholder,
 .profile-avatar-initials {
   display: grid;
+  place-items: center;
+}
+
+.profile-avatar-placeholder {
+  color: var(--ink);
+  background: transparent;
+  transition:
+    color 180ms ease,
+    background 180ms ease;
+}
+
+.profile-button.is-active .profile-avatar-placeholder {
   color: var(--surface);
   background: var(--accent);
-  place-items: center;
+}
+
+.profile-avatar-initials {
+  color: var(--surface);
+  background: var(--accent);
 }
 
 .profile-avatar-placeholder svg {
