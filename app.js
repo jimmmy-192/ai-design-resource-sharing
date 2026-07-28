@@ -191,7 +191,6 @@ const favoritesCount = document.querySelector("#favoritesCount");
 const profileTabButtons = [...document.querySelectorAll(".profile-tab")];
 const featuredCommentButton = document.querySelector("#featuredCommentButton");
 const commentLayer = document.querySelector("#commentLayer");
-const commentBackdrop = document.querySelector("#commentBackdrop");
 const commentClose = document.querySelector("#commentClose");
 const commentResourceLabel = document.querySelector("#commentResourceLabel");
 const commentDrawerTitle = document.querySelector("#commentDrawerTitle");
@@ -659,6 +658,7 @@ function openComments(resource) {
   commentLayer.classList.add("is-open");
   commentLayer.setAttribute("aria-hidden", "false");
   document.body.classList.add("is-comment-open");
+  appShell.classList.add("is-comments-expanded");
   document.querySelectorAll(".comment-button").forEach((button) => {
     button.setAttribute(
       "aria-expanded",
@@ -669,12 +669,19 @@ function openComments(resource) {
   commentInput.disabled = !canComment;
   commentSubmit.disabled = !canComment;
   loadComments(resource);
+  requestAnimationFrame(() => {
+    commentLayer.scrollIntoView({
+      behavior: state.reduceMotion ? "auto" : "smooth",
+      block: "nearest"
+    });
+  });
 }
 
 function closeComments() {
   commentLayer.classList.remove("is-open");
   commentLayer.setAttribute("aria-hidden", "true");
   document.body.classList.remove("is-comment-open");
+  appShell.classList.remove("is-comments-expanded");
   document.querySelectorAll(".comment-button").forEach((button) => {
     button.setAttribute("aria-expanded", "false");
   });
@@ -989,6 +996,7 @@ function layoutCards(isInitial = false) {
 
 function setActiveIndex(index) {
   if (isMasonryMode()) return;
+  if (commentLayer.classList.contains("is-open")) closeComments();
   const total = getCurrentResources().length;
   state.activeIndex = (index + total) % total;
   syncCommentButtons();
@@ -1120,6 +1128,10 @@ profileButton.addEventListener("click", () => setMode("profile"));
 
 featuredCommentButton.addEventListener("click", () => {
   const resource = getCurrentResources()[state.activeIndex];
+  if (commentLayer.classList.contains("is-open")) {
+    closeComments();
+    return;
+  }
   if (state.mode === "featured" && resource) openComments(resource);
 });
 
@@ -1151,7 +1163,6 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-commentBackdrop.addEventListener("click", closeComments);
 commentClose.addEventListener("click", closeComments);
 cancelReply.addEventListener("click", clearReply);
 commentForm.addEventListener("submit", submitComment);
