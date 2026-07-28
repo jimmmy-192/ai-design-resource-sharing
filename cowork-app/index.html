@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>设计资源精选</title>
-    <link rel="stylesheet" href="./styles.css?v=23" />
+    <link rel="stylesheet" href="./styles.css?v=24" />
   </head>
   <body>
     <main class="app-shell" aria-live="polite">
@@ -54,6 +54,18 @@
 
       <section class="stage" aria-label="资源案例">
         <div class="carousel" id="carousel"></div>
+        <button class="comment-button featured-comment-button" id="featuredCommentButton" type="button" aria-label="查看评论" aria-expanded="false">
+          <span class="comment-button-copy">
+            <span class="comment-icon-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+              </svg>
+              <span class="comment-count" hidden>0</span>
+            </span>
+            <span>评论</span>
+          </span>
+          <span class="comment-button-hint">查看讨论</span>
+        </button>
       </section>
 
       <section class="profile-view is-hidden" id="profileView" aria-label="我的资源库">
@@ -133,6 +145,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="./app.js?v=12"></script>
+    <script src="./app.js?v=13"></script>
   </body>
 </html>

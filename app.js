@@ -189,6 +189,7 @@ const profileContent = document.querySelector("#profileContent");
 const publishedCount = document.querySelector("#publishedCount");
 const favoritesCount = document.querySelector("#favoritesCount");
 const profileTabButtons = [...document.querySelectorAll(".profile-tab")];
+const featuredCommentButton = document.querySelector("#featuredCommentButton");
 const commentLayer = document.querySelector("#commentLayer");
 const commentBackdrop = document.querySelector("#commentBackdrop");
 const commentClose = document.querySelector("#commentClose");
@@ -382,9 +383,16 @@ function updateCommentButton(button, resourceId) {
 }
 
 function syncCommentButtons() {
-  document.querySelectorAll(".comment-button").forEach((button) => {
-    updateCommentButton(button, button.dataset.resourceId);
-  });
+  const resource =
+    state.mode === "featured" ? getCurrentResources()[state.activeIndex] : null;
+  if (!resource) {
+    featuredCommentButton.dataset.resourceId = "";
+    return;
+  }
+
+  const resourceId = getResourceId(resource);
+  featuredCommentButton.dataset.resourceId = resourceId;
+  updateCommentButton(featuredCommentButton, resourceId);
 }
 
 function makeProfileResourceCard(resource, options = {}) {
@@ -843,18 +851,6 @@ function makeCard(resource, index) {
         <p class="card-description">${resource.description}</p>
         <p class="card-action"><span>可以怎么用</span>${resource.action}</p>
       </div>
-      <button class="comment-button" type="button" aria-label="查看评论" aria-expanded="false">
-        <span class="comment-button-copy">
-          <span class="comment-icon-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
-            </svg>
-            <span class="comment-count" hidden>0</span>
-          </span>
-          <span>评论</span>
-        </span>
-        <span class="comment-button-hint">查看讨论</span>
-      </button>
     </div>
   `;
 
@@ -864,14 +860,6 @@ function makeCard(resource, index) {
   favoriteButton.addEventListener("click", (event) => {
     event.stopPropagation();
     toggleFavorite(resource, favoriteButton);
-  });
-
-  const commentButton = article.querySelector(".comment-button");
-  commentButton.dataset.resourceId = getResourceId(resource);
-  updateCommentButton(commentButton, getResourceId(resource));
-  commentButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    openComments(resource);
   });
 
   article.addEventListener("click", (event) => {
@@ -907,6 +895,7 @@ function renderCards() {
   resources.forEach((resource, index) => {
     carousel.appendChild(makeCard(resource, index));
   });
+  syncCommentButtons();
   layoutCards(true);
 }
 
@@ -1002,6 +991,7 @@ function setActiveIndex(index) {
   if (isMasonryMode()) return;
   const total = getCurrentResources().length;
   state.activeIndex = (index + total) % total;
+  syncCommentButtons();
   layoutCards();
 }
 
@@ -1127,6 +1117,11 @@ tabButtons.forEach((button) => {
 });
 
 profileButton.addEventListener("click", () => setMode("profile"));
+
+featuredCommentButton.addEventListener("click", () => {
+  const resource = getCurrentResources()[state.activeIndex];
+  if (state.mode === "featured" && resource) openComments(resource);
+});
 
 profileTabButtons.forEach((button) => {
   button.addEventListener("click", () => {
