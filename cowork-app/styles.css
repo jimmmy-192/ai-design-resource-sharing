@@ -176,7 +176,7 @@ h1 {
   cursor: pointer;
   background: transparent;
   border: 0;
-  border-radius: 999px;
+  border-radius: 6px;
 }
 
 .issue-option:hover {
@@ -464,7 +464,7 @@ body.is-masonry-view {
   cursor: pointer;
   background: rgba(255, 253, 247, 0.96);
   border: 1px solid rgba(23, 33, 28, 0.14);
-  border-radius: 6px;
+  border-radius: 999px;
   transition:
     color 180ms ease,
     background 180ms ease,
