@@ -144,6 +144,73 @@ const issues = [
         url: "https://itomdev.com/gallery"
       }
     ]
+  },
+  {
+    id: "2026-W31",
+    label: "第三期（7.22-7.29）",
+    range: "2026-W31 / 7.22-7.29",
+    resources: [
+      {
+        title: "Lunagraph",
+        category: "AI 设计到代码",
+        score: "15/15",
+        coverImage: "./assets/covers/lunagraph.jpg",
+        visualLabel: "Code-native Canvas",
+        summary: "在熟悉的设计画布里直接编辑真实 React、HTML 和 CSS，让设计与代码保持同一份源文件。",
+        description:
+          "Lunagraph 将画布元素直接映射为 React 组件，并让 Claude Code 读取和修改同一代码库。它支持在画布与代码间双向调整、沿用现有组件和设计 Token，适合观察“零交接”并不等于省略设计，而是把设计判断直接落到可运行界面。",
+        action: "选一个已有页面，把按钮、卡片和 Token 接入同一代码项目；分别从画布和代码修改一次，再检查响应式、组件复用和最终提交是否保持一致。",
+        url: "https://www.lunagraph.com/"
+      },
+      {
+        title: "Motionly",
+        category: "开源 AI 动效",
+        score: "15/15",
+        coverImage: "./assets/covers/motionly.jpg",
+        visualLabel: "Editable .motion",
+        summary: "让 AI 生成可检查、可版本化的 .motion 工程，而不是只交付一段无法继续编辑的视频。",
+        description:
+          "Motionly 用结构化 .motion 文件保存场景、时间线、素材、缓动和转场，设计师可以在画布或代码中继续修改。项目已开源，并在本期持续更新编辑器和 AI 能力；当前仍由自身运行时渲染，Lottie 等通用格式导出还在探索。",
+        action: "用一段 5 秒产品功能动效测试 AI 初稿，手动修改一个关键帧、缓动和文字样式，再比较文件差异是否足够清晰，能否进入团队版本管理。",
+        url: "https://www.motionly.site/"
+      },
+      {
+        title: "Rechroma",
+        category: "色彩系统工具",
+        score: "14/15",
+        coverImage: "./assets/covers/rechroma.jpg",
+        visualLabel: "OKLCH Tokens",
+        summary: "从一张图片或一个颜色建立 OKLCH 色阶，校验对比度并同步为 Figma 变量与代码 Token。",
+        description:
+          "Rechroma 不只生成几枚色卡，而是把颜色扩展为完整明度阶、语义角色和可访问性检查，并提供情境预览。免费版可完成配色与对比度判断，Pro 才包含工作区保存、Figma 变量同步和 CSS、SCSS、PDF 导出。",
+        action: "导入一个品牌主色，先生成 10–99 的色阶，再为背景、文字、边框和状态色分配角色；用同一组 Token 同步到 Figma 与 CSS，检查命名和对比度是否一致。",
+        url: "https://rechroma.com/"
+      },
+      {
+        title: "AVE",
+        category: "本地 AI 视频工作流",
+        score: "15/15",
+        coverImage: "./assets/covers/ave.jpg",
+        visualLabel: "Reviewable Timeline",
+        summary: "先让 AI 生成可审阅的剪辑计划，确认后再落到真实时间线，素材和导出默认留在本机。",
+        description:
+          "AVE 将 Ask 与 Plan 分开：小问题直接查询，多步骤剪辑先展示计划，再由用户批准实际剪切、字幕、转场和多尺寸序列。它保留完整非线性时间线，并可通过 MCP 连接 Codex 或 Claude Code；目前仅支持 Apple Silicon 与 macOS 14 以上。",
+        action: "导入一段产品录屏，要求它生成 30 秒竖屏版本；在执行前逐项检查选段、节奏、字幕和画幅计划，再批准并核对每个时间线改动是否可回退。",
+        url: "https://www.aivideoeditor.app/"
+      },
+      {
+        title: "House of Yellow",
+        category: "创意案例呈现",
+        score: "14/15",
+        coverImage: "./assets/covers/house-of-yellow.webp",
+        visualLabel: "Motion Portfolio",
+        summary: "用连续运动和全屏影像组织案例，同时把播放量与交付周期放进作品信息，而不只展示效果图。",
+        description:
+          "House of Yellow 把品牌片、商业内容和 3D 动画做成连续的滚动叙事，案例入口同时呈现项目类型、观看量和制作周期。它适合研究作品集如何把视觉冲击与可比较的项目事实并置，让浏览者快速判断规模、节奏和交付能力。",
+        action: "选一个近期项目，除了主视觉再补充项目类型、周期和一个可验证结果；把三项信息与案例入口放在同一屏，测试读者是否能在十秒内理解项目价值。",
+        url: "https://houseofyellow.nl/"
+      }
+    ]
   }
 ];
 
