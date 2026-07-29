@@ -53,11 +53,15 @@ def _get_db_conn() -> psycopg.Connection:
 def _parse_sso_user(decrypted_userinfo: Optional[str]) -> Optional[dict]:
     if not decrypted_userinfo:
         return None
+
     try:
-        fixed = decrypted_userinfo.encode("latin-1").decode("utf-8")
-        data = json.loads(fixed)
-    except (UnicodeEncodeError, UnicodeDecodeError, json.JSONDecodeError):
-        return None
+        data = json.loads(decrypted_userinfo)
+    except json.JSONDecodeError:
+        try:
+            fixed = decrypted_userinfo.encode("latin-1").decode("utf-8")
+            data = json.loads(fixed)
+        except (UnicodeEncodeError, UnicodeDecodeError, json.JSONDecodeError):
+            return None
 
     user_id = data.get("userId")
     email = data.get("email") or ""
