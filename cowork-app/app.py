@@ -60,15 +60,22 @@ def _parse_sso_user(decrypted_userinfo: Optional[str]) -> Optional[dict]:
         return None
 
     user_id = data.get("userId")
-    display_name = data.get("displayName") or data.get("name")
+    email = data.get("email") or ""
+    display_name = (
+        data.get("displayName")
+        or data.get("name")
+        or data.get("username")
+        or data.get("emailAlias")
+        or (email.split("@", 1)[0] if email else "")
+    )
     if not user_id or not display_name:
         return None
 
     return {
         "userId": str(user_id),
         "displayName": display_name,
-        "avatar": data.get("avatar") or "",
-        "email": data.get("email") or "",
+        "avatar": data.get("avatar") or data.get("avatarUrl") or "",
+        "email": email,
         "name": data.get("name") or "",
         "emailAlias": data.get("emailAlias") or "",
     }
