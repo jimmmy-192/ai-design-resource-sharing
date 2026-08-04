@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>设计资源精选</title>
-    <link rel="stylesheet" href="./styles.css?v=45" />
+    <link rel="stylesheet" href="./styles.css?v=46" />
   </head>
   <body>
     <main class="app-shell" aria-live="polite">
@@ -69,7 +69,7 @@
           hidden
         ></button>
         <div class="comment-placement-hint" id="commentPlacementHint" hidden>
-          点击任意位置放置评论
+          <strong id="commentPlacementHintText">点击内容区外任意位置放置评论</strong>
           <span>Esc 退出</span>
         </div>
         <form class="comment-point-composer" id="commentPointForm" hidden>
@@ -85,15 +85,15 @@
               </svg>
             </button>
           </header>
-          <label class="sr-only" for="commentPointInput">在此位置发表评论</label>
+          <label class="sr-only" for="commentPointInput">发表对这个案例的看法</label>
           <textarea
             id="commentPointInput"
             maxlength="1000"
             rows="3"
-            placeholder="写下你对这个位置的看法"
+            placeholder="写下你对这个案例的看法"
           ></textarea>
           <div class="comment-point-actions">
-            <span>评论会固定在这个位置</span>
+            <span>评论会关联到这个案例</span>
             <button id="commentPointSubmit" type="submit">发布</button>
           </div>
         </form>
@@ -222,6 +222,89 @@
         </article>
       </div>
 
+      <div class="publication-layer" id="publicationLayer" aria-hidden="true">
+        <button
+          class="publication-backdrop"
+          id="publicationBackdrop"
+          type="button"
+          aria-label="关闭发布窗口"
+        ></button>
+        <section
+          class="publication-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="publicationTitle"
+        >
+          <header class="publication-header">
+            <div>
+              <p>我的发布</p>
+              <h2 id="publicationTitle">添加设计资源</h2>
+            </div>
+            <button
+              class="publication-close"
+              id="publicationClose"
+              type="button"
+              aria-label="关闭发布窗口"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18"></path>
+              </svg>
+            </button>
+          </header>
+
+          <form class="publication-form" id="publicationForm">
+            <fieldset>
+              <legend>选择分类 <span>*</span></legend>
+              <div class="publication-categories" id="publicationCategories"></div>
+            </fieldset>
+
+            <label class="publication-field">
+              <span>资源链接 <strong>*</strong></span>
+              <input
+                id="publicationUrl"
+                name="url"
+                type="url"
+                inputmode="url"
+                autocomplete="url"
+                placeholder="https://"
+                required
+              />
+            </label>
+
+            <label class="publication-field">
+              <span>案例解读 <small>选填，留空由 AI 生成</small></span>
+              <textarea
+                id="publicationDescription"
+                name="description"
+                rows="4"
+                maxlength="1200"
+                placeholder="它是什么，哪些地方值得观察"
+              ></textarea>
+            </label>
+
+            <label class="publication-field">
+              <span>可以怎么用 <small>选填，留空由 AI 生成</small></span>
+              <textarea
+                id="publicationAction"
+                name="action"
+                rows="3"
+                maxlength="800"
+                placeholder="适合放进什么设计任务或工作流"
+              ></textarea>
+            </label>
+
+            <p class="publication-form-message" id="publicationFormMessage" role="status"></p>
+
+            <footer class="publication-actions">
+              <button id="publicationCancel" type="button">取消</button>
+              <button class="publication-submit" id="publicationSubmit" type="submit">
+                确定并生成
+              </button>
+            </footer>
+          </form>
+        </section>
+      </div>
+
       <div class="comment-layer" id="commentLayer" aria-hidden="true">
         <aside
           class="comment-popover"
@@ -250,7 +333,7 @@
               <button id="cancelReply" type="button">取消</button>
             </div>
             <label class="sr-only" for="commentInput">发表评论</label>
-            <textarea id="commentInput" maxlength="1000" rows="3" placeholder="写下你的看法"></textarea>
+            <textarea id="commentInput" maxlength="1000" rows="3" placeholder="写下你对这个案例的看法"></textarea>
             <div class="comment-form-actions">
               <span>最多 1000 字</span>
               <button class="comment-submit" id="commentSubmit" type="submit">发布评论</button>
@@ -261,6 +344,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="./app.js?v=26"></script>
+    <script src="./app.js?v=28"></script>
   </body>
 </html>

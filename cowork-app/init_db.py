@@ -49,6 +49,20 @@ CREATE TABLE IF NOT EXISTS publications (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (owner_id, resource_id)
 );
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS action TEXT NOT NULL DEFAULT '';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS visual_label TEXT NOT NULL DEFAULT '';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS filter_scope TEXT NOT NULL DEFAULT '';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'READY';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS error_message TEXT NOT NULL DEFAULT '';
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 CREATE INDEX IF NOT EXISTS idx_publications_owner_created
 ON publications (owner_id, created_at DESC);
 

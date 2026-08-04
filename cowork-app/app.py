@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import json
+import re
+import uuid
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote, urlparse
 
+import httpx
 import psycopg
-from fastapi import FastAPI, Header, HTTPException, Response
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -21,6 +25,22 @@ class CommentCreate(BaseModel):
     parentId: Optional[int] = None
     positionX: Optional[float] = None
     positionY: Optional[float] = None
+
+
+class PublicationCreate(BaseModel):
+    categoryId: str
+    url: str
+    description: Optional[str] = None
+    action: Optional[str] = None
+
+
+PUBLICATION_CATEGORIES = {
+    "product": "产品与体验",
+    "visual": "视觉与内容",
+    "motion": "动效与 3D",
+    "delivery": "开发与交付",
+    "workflow": "工作流与协作",
+}
 
 
 def _load_props(path: str) -> dict[str, str]:
@@ -121,6 +141,156 @@ def _serialize_comment(row: dict) -> dict:
         "positionY": row.get("position_y"),
         "createdAt": row["created_at"].isoformat(),
     }
+
+
+def _serialize_publication(row: dict) -> dict:
+    return {
+        "resourceId": row["resource_id"],
+        "title": row["title"],
+        "category": row["category"],
+        "summary": row["summary"],
+        "description": row.get("description") or "",
+        "action": row.get("action") or "",
+        "url": row["url"],
+        "coverImage": row["cover_image"],
+        "visualLabel": row.get("visual_label") or row["category"],
+        "filterScopeId": row.get("filter_scope") or "",
+        "status": row.get("status") or "READY",
+        "createdAt": row["created_at"].isoformat(),
+        "updatedAt": row.get("updated_at", row["created_at"]).isoformat(),
+    }
+
+
+def _publication_cover_url(url: str) -> str:
+    return f"https://image.thum.io/get/width/1200/crop/760/noanimate/{quote(url, safe=':/?&=%')}"
+
+
+def _fallback_publication_metadata(
+    url: str,
+    category: str,
+    description: str,
+    action: str,
+) -> dict[str, str]:
+    host = (urlparse(url).hostname or "新资源").removeprefix("www.")
+    raw_name = host.split(".", 1)[0].replace("-", " ").replace("_", " ").strip()
+    title = " ".join(part.capitalize() for part in raw_name.split()) or "新设计资源"
+    return {
+        "title": title[:80],
+        "summary": f"一个值得进一步体验和拆解的{category}资源。",
+        "description": description
+        or f"该资源来自 {host}，可用于观察其核心能力、页面结构和典型使用流程，并与现有设计方案进行对照。",
+        "action": action
+        or "先用一个小范围真实任务体验核心流程，再记录可复用的方法、限制条件和仍需人工判断的环节。",
+        "visualLabel": category,
+    }
+
+
+def _parse_ai_json(text: str) -> dict:
+    cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip(), flags=re.I)
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start < 0 or end <= start:
+        raise ValueError("AI response does not contain JSON")
+    data = json.loads(cleaned[start : end + 1])
+    if not isinstance(data, dict):
+        raise ValueError("AI response is not an object")
+    return data
+
+
+def _generate_publication_metadata(
+    publication_id: int,
+    url: str,
+    category: str,
+    description: str,
+    action: str,
+) -> None:
+    fallback = _fallback_publication_metadata(url, category, description, action)
+    result = dict(fallback)
+    error_message = ""
+
+    try:
+        ai_props = _load_props("ai.properties")
+        ai_base_url = ai_props.get("ai.base_url", "").rstrip("/")
+        ai_api_key = ai_props.get("ai.api_key", "")
+        if ai_base_url and ai_api_key:
+            prompt = f"""
+你在整理一个面向产品设计师的中文设计资源库。请根据下面的信息生成案例卡片内容。
+链接：{url}
+大类：{category}
+用户补充的案例解读：{description or "未填写"}
+用户补充的“可以怎么用”：{action or "未填写"}
+
+只返回 JSON 对象，不要 Markdown：
+{{
+  "title": "资源名称，尽量采用产品或项目的正式名称，最多 80 字",
+  "summary": "一句话价值概括，最多 70 个中文字符",
+  "description": "案例解读，说明它是什么、值得观察什么，100-180 个中文字符",
+  "action": "可以怎么用，给出具体可执行的使用方式，60-120 个中文字符",
+  "visualLabel": "2-4 个英文单词的视觉标签"
+}}
+用户已填写的字段必须保留原意并优先采用；不要虚构精确的发布时间、融资额或用户量。
+""".strip()
+            response = httpx.post(
+                f"{ai_base_url}/bedrock_runtime/model/invoke",
+                headers={
+                    "token": ai_api_key,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "anthropic_version": "bedrock-2023-05-31",
+                    "max_tokens": 1600,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=60,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("Code") or payload.get("Error"):
+                raise RuntimeError(f"AI call failed: {payload}")
+            generated = _parse_ai_json(payload["content"][0]["text"])
+            for key, limit in (
+                ("title", 80),
+                ("summary", 240),
+                ("description", 1200),
+                ("action", 800),
+                ("visualLabel", 80),
+            ):
+                value = str(generated.get(key) or "").strip()
+                if value:
+                    result[key] = value[:limit]
+            if description:
+                result["description"] = description[:1200]
+            if action:
+                result["action"] = action[:800]
+    except Exception as error:
+        error_message = str(error)[:500]
+
+    with _get_db_conn() as conn:
+        conn.execute(
+            """
+            UPDATE publications
+            SET
+              title = %s,
+              summary = %s,
+              description = %s,
+              action = %s,
+              visual_label = %s,
+              status = 'READY',
+              error_message = %s,
+              updated_at = NOW()
+            WHERE id = %s
+            """,
+            (
+                result["title"],
+                result["summary"],
+                result["description"],
+                result["action"],
+                result["visualLabel"],
+                error_message,
+                publication_id,
+            ),
+        )
+        conn.commit()
 
 
 app = FastAPI(title="AI Design Resource Sharing")
@@ -233,7 +403,20 @@ def list_publications(
         _upsert_user(conn, user)
         rows = conn.execute(
             """
-            SELECT resource_id, title, category, summary, url, cover_image, created_at
+            SELECT
+              resource_id,
+              title,
+              category,
+              summary,
+              description,
+              action,
+              url,
+              cover_image,
+              visual_label,
+              filter_scope,
+              status,
+              created_at,
+              updated_at
             FROM publications
             WHERE owner_id = %s
             ORDER BY created_at DESC
@@ -242,19 +425,97 @@ def list_publications(
         ).fetchall()
         conn.commit()
 
-    publications = [
-        {
-            "resourceId": row["resource_id"],
-            "title": row["title"],
-            "category": row["category"],
-            "summary": row["summary"],
-            "url": row["url"],
-            "coverImage": row["cover_image"],
-            "createdAt": row["created_at"].isoformat(),
-        }
-        for row in rows
-    ]
+    publications = [_serialize_publication(row) for row in rows]
     return JSONResponse({"publications": publications})
+
+
+@app.post("/api/publications", status_code=202)
+def create_publication(
+    payload: PublicationCreate,
+    background_tasks: BackgroundTasks,
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    category_id = payload.categoryId.strip()
+    category = PUBLICATION_CATEGORIES.get(category_id)
+    clean_url = payload.url.strip()
+    description = (payload.description or "").strip()
+    action = (payload.action or "").strip()
+
+    parsed_url = urlparse(clean_url)
+    if not category:
+        raise HTTPException(status_code=400, detail="invalid category")
+    if (
+        parsed_url.scheme not in {"http", "https"}
+        or not parsed_url.netloc
+        or len(clean_url) > 2000
+    ):
+        raise HTTPException(status_code=400, detail="invalid url")
+    if len(description) > 1200 or len(action) > 800:
+        raise HTTPException(status_code=400, detail="content is too long")
+
+    resource_id = f"publication-{uuid.uuid4().hex}"
+    cover_image = _publication_cover_url(clean_url)
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        row = conn.execute(
+            """
+            INSERT INTO publications (
+              owner_id,
+              resource_id,
+              title,
+              category,
+              summary,
+              description,
+              action,
+              url,
+              cover_image,
+              visual_label,
+              filter_scope,
+              status,
+              updated_at
+            )
+            VALUES (%s, %s, %s, %s, '', %s, %s, %s, %s, %s, %s, 'GENERATING', NOW())
+            RETURNING
+              id,
+              resource_id,
+              title,
+              category,
+              summary,
+              description,
+              action,
+              url,
+              cover_image,
+              visual_label,
+              filter_scope,
+              status,
+              created_at,
+              updated_at
+            """,
+            (
+                user["userId"],
+                resource_id,
+                "AI 正在生成中",
+                category,
+                description,
+                action,
+                clean_url,
+                cover_image,
+                category,
+                category_id,
+            ),
+        ).fetchone()
+        conn.commit()
+
+    background_tasks.add_task(
+        _generate_publication_metadata,
+        row["id"],
+        clean_url,
+        category,
+        description,
+        action,
+    )
+    return JSONResponse(_serialize_publication(row), status_code=202)
 
 
 @app.get("/api/comment-counts")

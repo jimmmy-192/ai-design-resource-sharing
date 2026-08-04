@@ -446,11 +446,13 @@ const isStandalonePreview =
   new URLSearchParams(window.location.search).has("preview");
 const previewStorageKeys = {
   comments: "ai-design-resource-sharing.preview-comments.v1",
-  favorites: "ai-design-resource-sharing.preview-favorites.v1"
+  favorites: "ai-design-resource-sharing.preview-favorites.v1",
+  publications: "ai-design-resource-sharing.preview-publications.v1"
 };
 const previewMemory = {
   comments: {},
-  favorites: []
+  favorites: [],
+  publications: []
 };
 const previewUser = {
   userId: "local-preview",
@@ -484,9 +486,12 @@ const state = {
   commentAnchorViewport: null,
   commentPlacementActive: false,
   pendingCommentPoint: null,
+  commentPlacementHintTimer: null,
   commentLoadToken: 0,
   detailResource: null,
   detailTrigger: null,
+  publicationTrigger: null,
+  publicationPollTimer: null,
   replyingTo: null,
   commentsState: "idle",
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -522,6 +527,7 @@ const featuredCommentButton = document.querySelector("#featuredCommentButton");
 const commentPinLayer = document.querySelector("#commentPinLayer");
 const commentPlacementSurface = document.querySelector("#commentPlacementSurface");
 const commentPlacementHint = document.querySelector("#commentPlacementHint");
+const commentPlacementHintText = document.querySelector("#commentPlacementHintText");
 const commentPointForm = document.querySelector("#commentPointForm");
 const commentPointAvatar = document.querySelector("#commentPointAvatar");
 const commentPointName = document.querySelector("#commentPointName");
@@ -552,6 +558,17 @@ const resourceDetailSummary = document.querySelector("#resourceDetailSummary");
 const resourceDetailDescription = document.querySelector("#resourceDetailDescription");
 const resourceDetailAction = document.querySelector("#resourceDetailAction");
 const resourceDetailExternal = document.querySelector("#resourceDetailExternal");
+const publicationLayer = document.querySelector("#publicationLayer");
+const publicationBackdrop = document.querySelector("#publicationBackdrop");
+const publicationClose = document.querySelector("#publicationClose");
+const publicationCancel = document.querySelector("#publicationCancel");
+const publicationForm = document.querySelector("#publicationForm");
+const publicationCategories = document.querySelector("#publicationCategories");
+const publicationUrl = document.querySelector("#publicationUrl");
+const publicationDescription = document.querySelector("#publicationDescription");
+const publicationAction = document.querySelector("#publicationAction");
+const publicationFormMessage = document.querySelector("#publicationFormMessage");
+const publicationSubmit = document.querySelector("#publicationSubmit");
 
 function getLatestIssue() {
   return issues[issues.length - 1];
@@ -569,8 +586,31 @@ function getResourceId(resource) {
   return resource.resourceId || resource.title;
 }
 
+function getResourceAliases(resource) {
+  return [
+    getResourceId(resource),
+    resource.title,
+    ...(resource.legacyResourceIds || [])
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).trim())
+    .filter((value, index, values) => values.indexOf(value) === index);
+}
+
 function getResourceById(resourceId) {
-  return getAllResources().find((resource) => getResourceId(resource) === resourceId);
+  return getAllResources().find((resource) =>
+    getResourceAliases(resource).includes(String(resourceId))
+  );
+}
+
+function getStoredFavoriteId(resource) {
+  return getResourceAliases(resource).find((resourceId) =>
+    state.favoriteIds.has(resourceId)
+  );
+}
+
+function isResourceFavorite(resource) {
+  return Boolean(getStoredFavoriteId(resource));
 }
 
 function getIssueResources() {
@@ -584,10 +624,10 @@ function getTaxonomyScope(scopeId) {
 
 function getResourceFilterMeta(resource) {
   const direct = resourceFilterAssignments[resource.title];
-  let scopeId = direct?.[0];
-  let tagId = direct?.[1];
+  let scopeId = resource.filterScopeId || direct?.[0];
+  let tagId = resource.filterTagId || direct?.[1];
 
-  if (!scopeId || !tagId) {
+  if (!scopeId) {
     const searchable = [
       resource.title,
       resource.category,
@@ -669,7 +709,16 @@ function applyResourceFilters(resources, filter) {
 
 function getProfileBaseResources(context = state.profileTab) {
   if (context === "favorites") {
-    return [...state.favoriteIds].map(getResourceById).filter(Boolean);
+    const seen = new Set();
+    return [...state.favoriteIds]
+      .map(getResourceById)
+      .filter((resource) => {
+        if (!resource) return false;
+        const resourceId = getResourceId(resource);
+        if (seen.has(resourceId)) return false;
+        seen.add(resourceId);
+        return true;
+      });
   }
   return state.publications;
 }
@@ -787,6 +836,7 @@ function writePreviewData(key, value) {
   } catch (error) {
     if (key === previewStorageKeys.comments) previewMemory.comments = value;
     if (key === previewStorageKeys.favorites) previewMemory.favorites = value;
+    if (key === previewStorageKeys.publications) previewMemory.publications = value;
   }
 }
 
@@ -804,6 +854,19 @@ function getPreviewFavorites() {
     previewMemory.favorites
   );
   return Array.isArray(stored) ? stored : [];
+}
+
+function getPreviewPublications() {
+  const stored = readPreviewData(
+    previewStorageKeys.publications,
+    previewMemory.publications
+  );
+  return Array.isArray(stored) ? stored : [];
+}
+
+function persistPreviewPublications(publications) {
+  previewMemory.publications = publications;
+  writePreviewData(previewStorageKeys.publications, publications);
 }
 
 function getPreviewCommentCounts() {
@@ -858,12 +921,119 @@ async function createResourceComment(resourceId, payload) {
   return comment;
 }
 
+function getPublicationCategory(categoryId) {
+  return filterTaxonomy.find((scope) => scope.id === categoryId) || filterTaxonomy[0];
+}
+
+function makePreviewPublicationMetadata(publication) {
+  const hostname = new URL(publication.url).hostname.replace(/^www\./, "");
+  const rawName = hostname.split(".")[0].replace(/[-_]+/g, " ").trim();
+  const title = rawName
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+  return {
+    ...publication,
+    title: title || "新设计资源",
+    summary: `一个值得进一步体验和拆解的${publication.category}资源。`,
+    description:
+      publication.description ||
+      `该资源来自 ${hostname}，可用于观察其核心能力、页面结构和典型使用流程，并与现有设计方案进行对照。`,
+    action:
+      publication.action ||
+      "先用一个小范围真实任务体验核心流程，再记录可复用的方法、限制条件和仍需人工判断的环节。",
+    visualLabel: publication.category,
+    status: "READY",
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function completePreviewPublication(resourceId) {
+  window.setTimeout(() => {
+    const publications = getPreviewPublications();
+    const index = publications.findIndex(
+      (publication) => publication.resourceId === resourceId
+    );
+    if (index < 0 || publications[index].status !== "GENERATING") return;
+    publications[index] = makePreviewPublicationMetadata(publications[index]);
+    persistPreviewPublications(publications);
+    state.publications = publications;
+    syncFavoriteButtons();
+    if (state.mode === "profile") renderProfile();
+  }, 1800);
+}
+
+async function createPublication(payload) {
+  if (!isStandalonePreview) {
+    return requestJson("/api/publications", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  const category = getPublicationCategory(payload.categoryId);
+  const now = new Date().toISOString();
+  const resourceId = `publication-preview-${Date.now()}`;
+  const publication = {
+    resourceId,
+    title: "AI 正在生成中",
+    category: category.label,
+    summary: "",
+    description: payload.description || "",
+    action: payload.action || "",
+    url: payload.url,
+    coverImage: `https://image.thum.io/get/width/1200/crop/760/noanimate/${payload.url}`,
+    visualLabel: category.label,
+    filterScopeId: category.id,
+    status: "GENERATING",
+    createdAt: now,
+    updatedAt: now
+  };
+  const publications = [publication, ...getPreviewPublications()];
+  persistPreviewPublications(publications);
+  completePreviewPublication(resourceId);
+  return publication;
+}
+
+async function refreshPublications() {
+  if (isStandalonePreview) {
+    state.publications = getPreviewPublications();
+  } else {
+    const payload = await requestJson("/api/publications");
+    state.publications = payload.publications || [];
+  }
+  syncFavoriteButtons();
+  if (state.mode === "profile") renderProfile();
+  schedulePublicationPolling();
+}
+
+function schedulePublicationPolling() {
+  if (state.publicationPollTimer) {
+    window.clearTimeout(state.publicationPollTimer);
+    state.publicationPollTimer = null;
+  }
+  if (!state.publications.some((publication) => publication.status === "GENERATING")) {
+    return;
+  }
+  state.publicationPollTimer = window.setTimeout(async () => {
+    try {
+      await refreshPublications();
+    } catch (error) {
+      schedulePublicationPolling();
+    }
+  }, 2200);
+}
+
 async function loadMemberData() {
   if (isStandalonePreview) {
     state.session = previewUser;
     state.sessionState = "ready";
     state.favoriteIds = new Set(getPreviewFavorites());
-    state.publications = [];
+    state.publications = getPreviewPublications();
+    state.publications
+      .filter((publication) => publication.status === "GENERATING")
+      .forEach((publication) => completePreviewPublication(publication.resourceId));
     state.commentCounts = getPreviewCommentCounts();
     updateSessionUI();
     updateCommentPointIdentity();
@@ -871,6 +1041,7 @@ async function loadMemberData() {
     syncCommentButtons();
     renderProfile();
     loadActiveResourceComments();
+    schedulePublicationPolling();
     return;
   }
 
@@ -892,6 +1063,7 @@ async function loadMemberData() {
     syncCommentButtons();
     renderProfile();
     loadActiveResourceComments();
+    schedulePublicationPolling();
   } catch (error) {
     state.sessionState = "unavailable";
     updateSessionUI();
@@ -908,17 +1080,21 @@ async function toggleFavorite(resource, button) {
   }
 
   const resourceId = getResourceId(resource);
-  const wasFavorite = state.favoriteIds.has(resourceId);
+  const storedFavoriteId = getStoredFavoriteId(resource);
+  const wasFavorite = Boolean(storedFavoriteId);
   button.disabled = true;
 
   try {
     if (!isStandalonePreview) {
-      await requestJson(`/api/favorites/${encodeURIComponent(resourceId)}`, {
+      await requestJson(
+        `/api/favorites/${encodeURIComponent(storedFavoriteId || resourceId)}`,
+        {
         method: wasFavorite ? "DELETE" : "POST"
-      });
+        }
+      );
     }
     if (wasFavorite) {
-      state.favoriteIds.delete(resourceId);
+      state.favoriteIds.delete(storedFavoriteId);
     } else {
       state.favoriteIds.add(resourceId);
     }
@@ -935,7 +1111,10 @@ async function toggleFavorite(resource, button) {
 }
 
 function updateFavoriteButton(button, resourceId) {
-  const selected = state.favoriteIds.has(resourceId);
+  const resource = getResourceById(resourceId);
+  const selected = resource
+    ? isResourceFavorite(resource)
+    : state.favoriteIds.has(resourceId);
   button.classList.toggle("is-saved", selected);
   button.setAttribute("aria-pressed", String(selected));
   button.setAttribute("aria-label", selected ? "取消收藏" : "收藏案例");
@@ -976,7 +1155,7 @@ function syncCommentButtons() {
   featuredCommentButton.setAttribute("aria-pressed", String(state.commentPlacementActive));
   featuredCommentButton.setAttribute("aria-expanded", "false");
   featuredCommentButton.querySelector(".comment-button-hint").textContent =
-    state.commentPlacementActive ? "点击页面放置" : "点击后放置评论";
+    state.commentPlacementActive ? "点击空白处放置" : "点击后放置评论";
   updateCommentButton(featuredCommentButton, resourceId);
   renderCommentPins();
 }
@@ -1209,7 +1388,67 @@ function makeProfileResourceCard(resource, options = {}) {
   return article;
 }
 
-function renderProfileEmpty(title, description) {
+function makePublicationCard(resource) {
+  const article = document.createElement("article");
+  article.className = "profile-publication-card";
+  const generating = resource.status === "GENERATING";
+  article.classList.toggle("is-generating", generating);
+
+  const media = document.createElement("div");
+  media.className = "profile-publication-media";
+  if (resource.coverImage) {
+    const image = document.createElement("img");
+    image.src = resource.coverImage;
+    image.alt = generating ? "" : `${resource.title} 页面截图`;
+    image.loading = "lazy";
+    media.appendChild(image);
+  }
+
+  if (generating) {
+    const status = document.createElement("span");
+    status.className = "profile-publication-status";
+    status.innerHTML = `
+      <span class="profile-publication-spinner" aria-hidden="true"></span>
+      AI 正在生成中
+    `;
+    media.appendChild(status);
+  }
+
+  const title = document.createElement("h3");
+  title.textContent = generating ? "正在读取资源" : resource.title;
+  article.append(media, title);
+
+  if (!generating) {
+    article.tabIndex = 0;
+    article.setAttribute("role", "button");
+    article.setAttribute("aria-label", `查看 ${resource.title} 详情`);
+    article.addEventListener("click", () => openResourceDetail(resource, article));
+    article.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openResourceDetail(resource, article);
+    });
+  } else {
+    article.setAttribute("aria-busy", "true");
+  }
+  return article;
+}
+
+function makePublishButton(label = "上传设计资源") {
+  const button = document.createElement("button");
+  button.className = "profile-publish-button";
+  button.type = "button";
+  button.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+    <span>${label}</span>
+  `;
+  button.addEventListener("click", () => openPublicationDialog(button));
+  return button;
+}
+
+function renderProfileEmpty(title, description, options = {}) {
   const empty = document.createElement("div");
   empty.className = "profile-empty";
 
@@ -1220,6 +1459,9 @@ function renderProfileEmpty(title, description) {
   copy.textContent = description;
 
   empty.append(heading, copy);
+  if (options.action === "publish") {
+    empty.appendChild(makePublishButton("上传第一个资源"));
+  }
   profileContent.replaceChildren(empty);
 }
 
@@ -1243,18 +1485,20 @@ function renderProfile() {
   }
 
   const baseResources = getProfileBaseResources();
-  profileFilterPanel.classList.remove("is-hidden");
-  syncFilterPanel(profileFilterPanel, state.profileTab);
 
   if (!baseResources.length) {
     renderProfileEmpty(
       state.profileTab === "favorites" ? "还没有收藏案例" : "还没有发布内容",
       state.profileTab === "favorites"
         ? "在案例卡片右上角点击收藏图标，内容会保存在这里。"
-        : "你发布到资源库的内容会按时间显示在这里。"
+        : "粘贴一个资源链接，AI 会自动补齐名称、案例解读和使用建议。",
+      state.profileTab === "published" ? { action: "publish" } : {}
     );
     return;
   }
+
+  profileFilterPanel.classList.remove("is-hidden");
+  syncFilterPanel(profileFilterPanel, state.profileTab);
 
   const resources = getFilteredResources(state.profileTab);
   if (!resources.length) {
@@ -1266,11 +1510,110 @@ function renderProfile() {
   }
 
   const grid = document.createElement("div");
-  grid.className = "profile-grid";
+  grid.className =
+    state.profileTab === "published"
+      ? "profile-publication-grid"
+      : "profile-grid";
   resources.forEach((resource) => {
-    grid.appendChild(makeProfileResourceCard(resource, { removable: state.profileTab === "favorites" }));
+    grid.appendChild(
+      state.profileTab === "published"
+        ? makePublicationCard(resource)
+        : makeProfileResourceCard(resource, { removable: true })
+    );
   });
-  profileContent.replaceChildren(grid);
+  if (state.profileTab === "published") {
+    const toolbar = document.createElement("div");
+    toolbar.className = "profile-publication-toolbar";
+    const count = document.createElement("span");
+    count.textContent = `${resources.length} 个发布`;
+    toolbar.append(count, makePublishButton());
+    profileContent.replaceChildren(toolbar, grid);
+  } else {
+    profileContent.replaceChildren(grid);
+  }
+}
+
+function renderPublicationCategories() {
+  const fragment = document.createDocumentFragment();
+  filterTaxonomy.forEach((scope, index) => {
+    const label = document.createElement("label");
+    label.className = "publication-category-option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "publicationCategory";
+    input.value = scope.id;
+    input.required = true;
+    input.checked = index === 0;
+    const icon = document.createElement("span");
+    icon.className = "publication-category-icon";
+    icon.innerHTML = filterScopeIcons[scope.id] || "";
+    const text = document.createElement("span");
+    text.textContent = scope.label;
+    label.append(input, icon, text);
+    fragment.appendChild(label);
+  });
+  publicationCategories.replaceChildren(fragment);
+}
+
+function openPublicationDialog(trigger) {
+  state.publicationTrigger =
+    trigger instanceof HTMLElement ? trigger : document.activeElement;
+  publicationForm.reset();
+  const firstCategory = publicationCategories.querySelector("input");
+  if (firstCategory) firstCategory.checked = true;
+  publicationFormMessage.textContent = "";
+  publicationLayer.classList.add("is-open");
+  publicationLayer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("is-publication-open");
+  requestAnimationFrame(() => publicationUrl.focus());
+}
+
+function closePublicationDialog() {
+  if (!publicationLayer.classList.contains("is-open")) return;
+  publicationLayer.classList.remove("is-open");
+  publicationLayer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("is-publication-open");
+  const trigger = state.publicationTrigger;
+  state.publicationTrigger = null;
+  if (trigger?.isConnected) trigger.focus();
+}
+
+async function submitPublication(event) {
+  event.preventDefault();
+  const categoryInput = publicationForm.querySelector(
+    'input[name="publicationCategory"]:checked'
+  );
+  if (!categoryInput) return;
+
+  publicationSubmit.disabled = true;
+  publicationFormMessage.textContent = "正在创建生成任务…";
+  publicationFormMessage.classList.remove("is-error");
+
+  try {
+    const publication = await createPublication({
+      categoryId: categoryInput.value,
+      url: publicationUrl.value.trim(),
+      description: publicationDescription.value.trim(),
+      action: publicationAction.value.trim()
+    });
+    state.publications = [
+      publication,
+      ...state.publications.filter(
+        (item) => item.resourceId !== publication.resourceId
+      )
+    ];
+    closePublicationDialog();
+    state.profileTab = "published";
+    syncFavoriteButtons();
+    renderProfile();
+    schedulePublicationPolling();
+  } catch (error) {
+    publicationFormMessage.textContent =
+      "发布未创建，请检查链接后重试。";
+    publicationFormMessage.classList.add("is-error");
+  } finally {
+    publicationSubmit.disabled = false;
+  }
 }
 
 function formatCommentTime(value) {
@@ -1420,7 +1763,7 @@ function clearReply() {
   state.replyingTo = null;
   replyingTo.classList.add("is-hidden");
   replyingToText.textContent = "";
-  commentInput.placeholder = "写下你的看法";
+  commentInput.placeholder = "写下你对这个案例的看法";
 }
 
 function createCommentItem(comment, childrenByParent, depth = 0) {
@@ -1491,7 +1834,10 @@ function renderComments() {
   }
 
   if (!state.comments.length) {
-    renderCommentMessage("还没有评论", "关闭详情后，点击评论按钮在页面上放置第一条评论。");
+    renderCommentMessage(
+      "还没有评论",
+      "关闭详情后，点击评论按钮，在内容区外放置第一条案例评论。"
+    );
     return;
   }
 
@@ -1611,6 +1957,9 @@ function updateCommentPlacementUI() {
   commentPlacementSurface.hidden = !active;
   commentPlacementHint.hidden = !active || Boolean(state.pendingCommentPoint);
   stage.classList.toggle("is-comment-placing", active);
+  commentPlacementSurface.classList.remove("is-blocked");
+  commentPlacementHint.classList.remove("is-error");
+  commentPlacementHintText.textContent = "点击内容区外任意位置放置评论";
   if (!active) {
     commentPointForm.hidden = true;
     commentPointInput.value = "";
@@ -1620,6 +1969,10 @@ function updateCommentPlacementUI() {
 
 function cancelCommentPlacement({ restoreFocus = false } = {}) {
   const wasActive = state.commentPlacementActive;
+  if (state.commentPlacementHintTimer) {
+    window.clearTimeout(state.commentPlacementHintTimer);
+    state.commentPlacementHintTimer = null;
+  }
   state.commentPlacementActive = false;
   state.pendingCommentPoint = null;
   updateCommentPlacementUI();
@@ -1642,6 +1995,50 @@ function toggleCommentPlacement() {
   updateCommentPlacementUI();
 }
 
+function getCommentBlockedRegion() {
+  const visibleCards = [...carousel.querySelectorAll(".resource-card")].filter(
+    (card) => card.getAttribute("aria-hidden") !== "true"
+  );
+  if (!visibleCards.length) return null;
+  const rects = visibleCards
+    .map((card) => card.getBoundingClientRect())
+    .filter((rect) => rect.width > 0 && rect.height > 0);
+  if (!rects.length) return null;
+
+  const padding = 8;
+  return {
+    left: Math.min(...rects.map((rect) => rect.left)) - padding,
+    right: Math.max(...rects.map((rect) => rect.right)) + padding,
+    top: Math.min(...rects.map((rect) => rect.top)) - padding,
+    bottom: Math.max(...rects.map((rect) => rect.bottom)) + padding
+  };
+}
+
+function isCommentPlacementBlocked(clientX, clientY) {
+  const region = getCommentBlockedRegion();
+  if (!region) return false;
+  return (
+    clientX >= region.left &&
+    clientX <= region.right &&
+    clientY >= region.top &&
+    clientY <= region.bottom
+  );
+}
+
+function showCommentPlacementError() {
+  if (state.commentPlacementHintTimer) {
+    window.clearTimeout(state.commentPlacementHintTimer);
+  }
+  commentPlacementHint.hidden = false;
+  commentPlacementHint.classList.add("is-error");
+  commentPlacementHintText.textContent = "内容卡片区域不可放置，请选择周围空白处";
+  state.commentPlacementHintTimer = window.setTimeout(() => {
+    commentPlacementHint.classList.remove("is-error");
+    commentPlacementHintText.textContent = "点击内容区外任意位置放置评论";
+    state.commentPlacementHintTimer = null;
+  }, 1800);
+}
+
 function placeCommentComposer(event) {
   if (!state.commentPlacementActive) return;
 
@@ -1653,6 +2050,10 @@ function placeCommentComposer(event) {
   const clientY = hasPointerPosition
     ? event.clientY
     : stageRect.top + stageRect.height / 2;
+  if (isCommentPlacementBlocked(clientX, clientY)) {
+    showCommentPlacementError();
+    return;
+  }
   const x = Math.min(Math.max((clientX - stageRect.left) / stageRect.width, 0.02), 0.98);
   const y = Math.min(Math.max((clientY - stageRect.top) / stageRect.height, 0.04), 0.96);
   state.pendingCommentPoint = { x, y };
@@ -1685,6 +2086,14 @@ function placeCommentComposer(event) {
     commentPointForm.style.top = `${top}px`;
     commentPointInput.focus();
   });
+}
+
+function updateCommentPlacementCursor(event) {
+  if (!state.commentPlacementActive) return;
+  commentPlacementSurface.classList.toggle(
+    "is-blocked",
+    isCommentPlacementBlocked(event.clientX, event.clientY)
+  );
 }
 
 async function submitPointComment(event) {
@@ -1865,15 +2274,21 @@ function openResourceDetail(resource, trigger) {
 
   resourceDetailImage.src = resource.coverImage;
   resourceDetailImage.alt = `${resource.title} 原始页面截图`;
-  resourceDetailVisualLabel.textContent = resource.visualLabel;
+  resourceDetailVisualLabel.textContent =
+    resource.visualLabel || resource.category || "Design Resource";
   resourceDetailCategory.replaceChildren(makeCategoryTag(resource));
-  resourceDetailScore.textContent = resource.score;
+  resourceDetailScore.textContent = resource.score || "";
+  resourceDetailScore.hidden = !resource.score;
   resourceDetailTitle.textContent = resource.title;
-  resourceDetailSummary.textContent = resource.summary;
-  resourceDetailDescription.textContent = resource.description;
-  resourceDetailAction.textContent = resource.action;
+  resourceDetailSummary.textContent =
+    resource.summary || "这是一个值得进一步体验和拆解的设计资源。";
+  resourceDetailDescription.textContent =
+    resource.description || "AI 正在补充这个案例的详细解读。";
+  resourceDetailAction.textContent =
+    resource.action || "先从一个小范围真实任务开始体验，再判断它是否适合加入现有工作流。";
   resourceDetailExternal.href = resource.url;
   resourceDetailExternal.setAttribute("aria-label", `访问 ${resource.title} 原网站`);
+  resourceDetailExternal.hidden = !resource.url;
 
   resourceDetailLayer.classList.add("is-open");
   resourceDetailLayer.setAttribute("aria-hidden", "false");
@@ -2392,7 +2807,8 @@ tabButtons.forEach((button) => {
 
 profileButton.addEventListener("click", () => setMode("profile"));
 
-featuredCommentButton.addEventListener("click", () => {
+featuredCommentButton.addEventListener("click", (event) => {
+  event.stopPropagation();
   toggleCommentPlacement();
 });
 
@@ -2419,6 +2835,10 @@ window.addEventListener("keydown", (event) => {
       cancelCommentPlacement({ restoreFocus: true });
       return;
     }
+    if (publicationLayer.classList.contains("is-open")) {
+      closePublicationDialog();
+      return;
+    }
     if (resourceDetailLayer.classList.contains("is-open")) {
       closeResourceDetail();
       return;
@@ -2434,10 +2854,18 @@ window.addEventListener("keydown", (event) => {
 
 resourceDetailBackdrop.addEventListener("click", closeResourceDetail);
 resourceDetailClose.addEventListener("click", closeResourceDetail);
+publicationBackdrop.addEventListener("click", closePublicationDialog);
+publicationClose.addEventListener("click", closePublicationDialog);
+publicationCancel.addEventListener("click", closePublicationDialog);
+publicationForm.addEventListener("submit", submitPublication);
 commentClose.addEventListener("click", closeComments);
 cancelReply.addEventListener("click", clearReply);
 commentForm.addEventListener("submit", submitComment);
 commentPlacementSurface.addEventListener("click", placeCommentComposer);
+commentPlacementSurface.addEventListener("pointermove", updateCommentPlacementCursor);
+commentPlacementSurface.addEventListener("pointerleave", () => {
+  commentPlacementSurface.classList.remove("is-blocked");
+});
 commentPointCancel.addEventListener("click", () => {
   cancelCommentPlacement({ restoreFocus: true });
 });
@@ -2487,6 +2915,7 @@ if (window.gsap) {
 }
 
 renderIssueMenu();
+renderPublicationCategories();
 setMode("featured", false);
 updateSessionUI();
 renderProfile();
