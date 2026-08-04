@@ -133,7 +133,7 @@ const issues = [
       },
       {
         title: "ITom Dev 3D Gallery",
-        category: "创意开发案例",
+        category: "创意动效网站",
         score: "14/15",
         coverImage: "./assets/covers/itom-gallery.jpg",
         visualLabel: "3D Corridor",
@@ -200,7 +200,7 @@ const issues = [
       },
       {
         title: "House of Yellow",
-        category: "创意案例呈现",
+        category: "动效作品集",
         score: "14/15",
         coverImage: "./assets/covers/house-of-yellow.webp",
         visualLabel: "Motion Portfolio",
@@ -211,22 +211,282 @@ const issues = [
         url: "https://houseofyellow.nl/"
       }
     ]
+  },
+  {
+    id: "2026-W32",
+    label: "第四期（7.29-8.5）",
+    range: "2026-W32 / 7.29-8.5",
+    resources: [
+      {
+        title: "Working Volumes",
+        category: "创意交互网站",
+        score: "15/15",
+        coverImage: "./assets/covers/working-volumes.png",
+        visualLabel: "Interactive Library",
+        summary: "把七种创作工具做成可翻阅、可旋转的布面书册，让工具介绍成为一段空间化探索。",
+        description:
+          "这个 Three.js 互动书架把 Codex 等七种创作工具整理成一套可触摸感很强的 field guide。用户可以旋转书架、打开书封并浏览每本书的定位与主题；材质、字体和空间交互保持统一，同时仍保留直接可见的书名与操作提示。",
+        action: "选择一组工具或作品，把每项压缩成“一句定位、三个主题、关键属性”三层；再用统一容器和直接导航测试探索感是否影响信息查找。",
+        url: "https://mengto.github.io/complete-shelf/"
+      },
+      {
+        title: "Brik",
+        category: "AI 设计系统",
+        score: "15/15",
+        coverImage: "./assets/covers/brik.png",
+        visualLabel: "Living Design Tools",
+        summary: "把一次性视觉生成转成可复用、可交互和可导出的设计工具，持续沉淀为个人系统。",
+        description:
+          "Brik 允许用户从描述或素材开始构建图像特效、动态字体、3D 场景、画廊和 Logo 动效，再把结果保留为可继续修改的工具。它更值得关注的不是单次生成，而是如何把风格规则和交互参数变成可复用系统。",
+        action: "选一个经常重复制作的视觉效果，先定义输入素材、可调参数和导出格式，再判断它是否值得沉淀成团队可复用工具。",
+        url: "https://brik.space/Home"
+      },
+      {
+        title: "The Tie-break",
+        category: "互动叙事案例",
+        score: "15/15",
+        coverImage: "./assets/covers/the-tie-break.png",
+        visualLabel: "Interactive Editorial",
+        summary: "把网球对打变成浏览联名系列的互动入口，让每次得分同时推进游戏和内容揭示。",
+        description:
+          "Merci-Michel 为 New Balance × Miu Miu 与 Coco Gauff 制作了这段实时互动体验。页面没有把运动机制当作装饰：发球、回击和计分承担浏览节奏，得分后逐步解锁造型内容；克制的界面层级、颗粒材质和连贯转场让品牌叙事始终处于中心。",
+        action: "选择一个需要逐步揭示的产品系列，把内容拆成“进入、操作、反馈、解锁”四个状态；先用简单点击原型验证每次操作是否确实带来新信息，再考虑加入复杂动效。",
+        url: "https://thetiebreak.merci-michel.com/eu/en/"
+      },
+      {
+        title: "Canvas UI",
+        category: "开源交互组件",
+        score: "15/15",
+        coverImage: "./assets/covers/canvas-ui.png",
+        visualLabel: "WebGL Components",
+        summary: "提供可直接复制源码的 WebGL 与 Canvas 交互组件，并覆盖六种前端框架。",
+        description:
+          "Canvas UI 收录 30 多个可现场体验的视觉组件，包括玻璃折射、粒子揭示、布料、液体和 3D 破碎效果。组件通过 shadcn 协议进入项目，支持 React、Vue、Svelte 等六种实现，并为不支持实验能力的浏览器提供降级方案。",
+        action: "从一个组件开始，只替换到非核心视觉区；同时检查移动端、减少动效偏好、离屏暂停和降级状态，再决定是否用于正式页面。",
+        url: "https://canvasui.dev/"
+      },
+      {
+        title: "Notate",
+        category: "原型反馈工具",
+        score: "15/15",
+        coverImage: "./assets/covers/notate.png",
+        visualLabel: "Screen Annotation",
+        summary: "冻结 hover、焦点和动效帧后直接落点批注，并把编号反馈导出给同事或 Coding Agent。",
+        description:
+          "Notate 面向设计评审和开发协作：它可以冻结当前屏幕或录制一段过程，在任意帧添加编号、箭头和形状，再导出带路径的 Markdown 或合成图片。批注会保存在可重新打开的会话中，同时提供 CLI、Skill 与 MCP 接口，适合把视觉问题直接交给开发代理处理。",
+        action: "选一个包含 hover 或动效的页面，冻结最容易描述不清的状态并添加三条编号反馈；导出 Markdown 交给同事或 Coding Agent，比较它与纯文字说明的沟通成本。",
+        url: "https://usenotate.app/"
+      },
+      {
+        title: "Flodesk Studio",
+        category: "AI 邮件设计",
+        score: "14/15",
+        coverImage: "./assets/covers/flodesk-studio.png",
+        visualLabel: "On-brand Email",
+        summary: "从品牌资料和一句提示生成三种邮件方向，再通过对话或手动编辑继续收敛。",
+        description:
+          "Flodesk Studio 是独立的 AI 邮件设计工具。它先读取品牌与内容，再给出三个经过人工设计模板约束的方向；用户既可以继续对话修改，也可以直接调整模块和控件，最后导出 HTML 或进入 Flodesk 发送。",
+        action: "用同一封活动邮件生成三种方向，重点比较品牌一致性、移动端层级和 CTA 清晰度，而不是只选择最吸睛的版式。",
+        url: "https://studio.flodesk.com/"
+      },
+      {
+        title: "animos",
+        category: "设计动效工具",
+        score: "14/15",
+        coverImage: "./assets/covers/animos.png",
+        visualLabel: "Browser Motion",
+        summary: "把静态设计或视频放进预设动效模板，在浏览器里快速导出作品展示片段。",
+        description:
+          "animos 提供 25 个循环动效模板，支持图片和视频替换、比例调整，并能直接导出 MP4 或 WebM。免费版本可导出 720p，付费版本覆盖 1080p 到 8K，适合发布页、作品集、社交媒体和产品更新素材。",
+        action: "选一张近期界面，分别导出横版、方形和竖版；检查动效是否帮助理解界面重点，而不是让展示模板抢走内容本身。",
+        url: "https://animos.app/"
+      }
+    ]
   }
 ];
 
+const filterTaxonomy = [
+  {
+    id: "product",
+    label: "产品与体验",
+    tags: [
+      { id: "business", label: "B 端与业务" },
+      { id: "prototype", label: "原型反馈" },
+      { id: "system", label: "体验与系统" }
+    ]
+  },
+  {
+    id: "visual",
+    label: "视觉与内容",
+    tags: [
+      { id: "production", label: "视觉生产" },
+      { id: "brand", label: "品牌与创意" },
+      { id: "showcase", label: "创意网站与作品集" }
+    ]
+  },
+  {
+    id: "motion",
+    label: "动效与 3D",
+    tags: [
+      { id: "animation", label: "动效制作" },
+      { id: "spatial", label: "3D 生成与资产" },
+      { id: "video", label: "视频工作流" }
+    ]
+  },
+  {
+    id: "delivery",
+    label: "开发与交付",
+    tags: [
+      { id: "code", label: "设计到代码" },
+      { id: "handoff", label: "交付与展示" },
+      { id: "opensource", label: "开源工具" }
+    ]
+  },
+  {
+    id: "workflow",
+    label: "工作流与协作",
+    tags: [
+      { id: "ai-workflow", label: "AI 工作流" },
+      { id: "canvas", label: "创意画布" },
+      { id: "collaboration", label: "协作评审" }
+    ]
+  }
+];
+
+const filterScopeIcons = {
+  all: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+      <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+      <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+    </svg>
+  `,
+  product: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+      <path d="M3 9h18M9 21V9"></path>
+    </svg>
+  `,
+  visual: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+      <path d="m21 15-5-5L5 21"></path>
+    </svg>
+  `,
+  motion: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+      <path d="m3 8 9 5 9-5v8l-9 5-9-5V8Z"></path>
+      <path d="M12 13v8"></path>
+    </svg>
+  `,
+  delivery: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m18 8 4 4-4 4M6 8l-4 4 4 4M14.5 4l-5 16"></path>
+    </svg>
+  `,
+  workflow: `
+    <svg class="category-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+      <rect x="15" y="15" width="6" height="6" rx="1"></rect>
+      <path d="M9 6h6a3 3 0 0 1 3 3v6M15 18H9a3 3 0 0 1-3-3V9"></path>
+    </svg>
+  `
+};
+
+const resourceFilterAssignments = {
+  "Warehouse Management": ["product", "business"],
+  Vela: ["visual", "brand"],
+  Motion: ["motion", "animation"],
+  Framed: ["delivery", "handoff"],
+  OpenPencil: ["delivery", "opensource"],
+  "Genspark 6.0": ["workflow", "ai-workflow"],
+  "Loova Ads Studio": ["visual", "production"],
+  V2Fun: ["motion", "spatial"],
+  Miora: ["workflow", "canvas"],
+  "dot.": ["product", "prototype"],
+  "ITom Dev 3D Gallery": ["visual", "showcase"],
+  Lunagraph: ["delivery", "code"],
+  Motionly: ["motion", "animation"],
+  Rechroma: ["product", "system"],
+  AVE: ["motion", "video"],
+  "House of Yellow": ["visual", "showcase"],
+  "Working Volumes": ["visual", "showcase"],
+  Brik: ["workflow", "ai-workflow"],
+  "The Tie-break": ["visual", "showcase"],
+  "Canvas UI": ["delivery", "opensource"],
+  Notate: ["product", "prototype"],
+  "Flodesk Studio": ["visual", "production"],
+  animos: ["motion", "animation"]
+};
+
+const fallbackFilterRules = [
+  { scope: "product", tag: "business", pattern: /B\s*端|后台|业务|管理|SaaS/i },
+  { scope: "product", tag: "prototype", pattern: /原型|反馈|评审|批注|可用性/i },
+  { scope: "product", tag: "system", pattern: /设计系统|色彩|组件|Token|体验/i },
+  { scope: "visual", tag: "showcase", pattern: /作品集|创意网站|案例呈现|Portfolio|Gallery/i },
+  { scope: "motion", tag: "spatial", pattern: /3D|三维|空间|WebGL|Three\.?js/i },
+  { scope: "motion", tag: "video", pattern: /视频|剪辑|字幕|时间线/i },
+  { scope: "motion", tag: "animation", pattern: /动效|动画|Motion|Animation/i },
+  { scope: "delivery", tag: "opensource", pattern: /开源|Open\s*Source/i },
+  { scope: "delivery", tag: "code", pattern: /代码|开发|React|HTML|CSS|设计到代码/i },
+  { scope: "delivery", tag: "handoff", pattern: /交付|展示|Mockup|发布/i },
+  { scope: "workflow", tag: "canvas", pattern: /画布|Canvas/i },
+  { scope: "workflow", tag: "collaboration", pattern: /协作|团队|评论/i },
+  { scope: "workflow", tag: "ai-workflow", pattern: /工作流|流程|Agent|智能体/i },
+  { scope: "visual", tag: "production", pattern: /视觉生产|广告|图像|素材|内容生成/i },
+  { scope: "visual", tag: "brand", pattern: /品牌|创意|视觉/i }
+];
+
+const isStandalonePreview =
+  window.location.protocol === "file:" ||
+  window.location.hostname.endsWith("github.io") ||
+  new URLSearchParams(window.location.search).has("preview");
+const previewStorageKeys = {
+  comments: "ai-design-resource-sharing.preview-comments.v1",
+  favorites: "ai-design-resource-sharing.preview-favorites.v1"
+};
+const previewMemory = {
+  comments: {},
+  favorites: []
+};
+const previewUser = {
+  userId: "local-preview",
+  displayName: "预览用户",
+  avatar: "",
+  email: ""
+};
+
 const state = {
   mode: "featured",
-  layoutMode: "stack",
+  layoutMode: "masonry",
   issueId: "all",
   activeIndex: 0,
   profileTab: "published",
+  filters: {
+    all: { query: "", scope: "", tag: "" },
+    published: { query: "", scope: "", tag: "" },
+    favorites: { query: "", scope: "", tag: "" }
+  },
   session: null,
   sessionState: "loading",
   favoriteIds: new Set(),
   publications: [],
   commentCounts: new Map(),
+  commentCache: new Map(),
   comments: [],
   commentResource: null,
+  commentThreadRootId: null,
+  commentAnchorPoint: null,
+  commentAnchorElement: null,
+  commentAnchorViewport: null,
+  commentPlacementActive: false,
+  pendingCommentPoint: null,
+  commentLoadToken: 0,
+  detailResource: null,
+  detailTrigger: null,
   replyingTo: null,
   commentsState: "idle",
   reduceMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -242,6 +502,7 @@ const issueFilterButton = document.querySelector("#issueFilterButton");
 const issueFilterValue = document.querySelector("#issueFilterValue");
 const issueMenu = document.querySelector("#issueMenu");
 const layoutToggle = document.querySelector("#layoutToggle");
+const allFilterPanel = document.querySelector("#allFilterPanel");
 const appShell = document.querySelector(".app-shell");
 const stage = document.querySelector(".stage");
 const tabButtons = [...document.querySelectorAll(".tab-button")];
@@ -256,9 +517,19 @@ const profileContent = document.querySelector("#profileContent");
 const publishedCount = document.querySelector("#publishedCount");
 const favoritesCount = document.querySelector("#favoritesCount");
 const profileTabButtons = [...document.querySelectorAll(".profile-tab")];
+const profileFilterPanel = document.querySelector("#profileFilterPanel");
 const featuredCommentButton = document.querySelector("#featuredCommentButton");
+const commentPinLayer = document.querySelector("#commentPinLayer");
+const commentPlacementSurface = document.querySelector("#commentPlacementSurface");
+const commentPlacementHint = document.querySelector("#commentPlacementHint");
+const commentPointForm = document.querySelector("#commentPointForm");
+const commentPointAvatar = document.querySelector("#commentPointAvatar");
+const commentPointName = document.querySelector("#commentPointName");
+const commentPointInput = document.querySelector("#commentPointInput");
+const commentPointCancel = document.querySelector("#commentPointCancel");
+const commentPointSubmit = document.querySelector("#commentPointSubmit");
 const commentLayer = document.querySelector("#commentLayer");
-const commentBackdrop = document.querySelector("#commentBackdrop");
+const commentPopover = document.querySelector("#commentPopover");
 const commentClose = document.querySelector("#commentClose");
 const commentResourceLabel = document.querySelector("#commentResourceLabel");
 const commentDrawerTitle = document.querySelector("#commentDrawerTitle");
@@ -269,6 +540,18 @@ const commentSubmit = document.querySelector("#commentSubmit");
 const replyingTo = document.querySelector("#replyingTo");
 const replyingToText = document.querySelector("#replyingToText");
 const cancelReply = document.querySelector("#cancelReply");
+const resourceDetailLayer = document.querySelector("#resourceDetailLayer");
+const resourceDetailBackdrop = document.querySelector("#resourceDetailBackdrop");
+const resourceDetailClose = document.querySelector("#resourceDetailClose");
+const resourceDetailImage = document.querySelector("#resourceDetailImage");
+const resourceDetailVisualLabel = document.querySelector("#resourceDetailVisualLabel");
+const resourceDetailCategory = document.querySelector("#resourceDetailCategory");
+const resourceDetailScore = document.querySelector("#resourceDetailScore");
+const resourceDetailTitle = document.querySelector("#resourceDetailTitle");
+const resourceDetailSummary = document.querySelector("#resourceDetailSummary");
+const resourceDetailDescription = document.querySelector("#resourceDetailDescription");
+const resourceDetailAction = document.querySelector("#resourceDetailAction");
+const resourceDetailExternal = document.querySelector("#resourceDetailExternal");
 
 function getLatestIssue() {
   return issues[issues.length - 1];
@@ -283,17 +566,126 @@ function getAllResources() {
 }
 
 function getResourceId(resource) {
-  return resource.title;
+  return resource.resourceId || resource.title;
 }
 
 function getResourceById(resourceId) {
   return getAllResources().find((resource) => getResourceId(resource) === resourceId);
 }
 
-function getCurrentResources() {
-  if (state.mode === "featured") return getLatestIssue().resources;
+function getIssueResources() {
   if (state.issueId === "all") return getAllResources();
   return getSelectedIssue().resources;
+}
+
+function getTaxonomyScope(scopeId) {
+  return filterTaxonomy.find((scope) => scope.id === scopeId);
+}
+
+function getResourceFilterMeta(resource) {
+  const direct = resourceFilterAssignments[resource.title];
+  let scopeId = direct?.[0];
+  let tagId = direct?.[1];
+
+  if (!scopeId || !tagId) {
+    const searchable = [
+      resource.title,
+      resource.category,
+      resource.summary,
+      resource.description,
+      resource.action,
+      resource.visualLabel
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const fallback = fallbackFilterRules.find((rule) => rule.pattern.test(searchable));
+    scopeId = fallback?.scope || "product";
+    tagId = fallback?.tag || "system";
+  }
+
+  const scope = getTaxonomyScope(scopeId) || filterTaxonomy[0];
+  const tag = scope.tags.find((item) => item.id === tagId) || scope.tags[0];
+  return {
+    scopeId: scope.id,
+    scopeLabel: scope.label,
+    tagId: tag.id,
+    tagLabel: tag.label
+  };
+}
+
+function makeCategoryTag(resource, label = resource.category) {
+  const meta = getResourceFilterMeta(resource);
+  const badge = document.createElement("span");
+  const text = document.createElement("span");
+
+  badge.className = `category category-${meta.scopeId}`;
+  badge.title = meta.scopeLabel;
+  badge.innerHTML = filterScopeIcons[meta.scopeId] || "";
+  text.textContent = label;
+  badge.appendChild(text);
+  return badge;
+}
+
+function normalizeSearchValue(value) {
+  return String(value || "")
+    .toLocaleLowerCase("zh-CN")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function resourceMatchesQuery(resource, query) {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery) return true;
+  const meta = getResourceFilterMeta(resource);
+  const searchable = normalizeSearchValue(
+    [
+      resource.title,
+      resource.category,
+      resource.summary,
+      resource.description,
+      resource.action,
+      resource.visualLabel,
+      meta.scopeLabel,
+      meta.tagLabel
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+  return normalizedQuery
+    .split(" ")
+    .filter(Boolean)
+    .every((term) => searchable.includes(term));
+}
+
+function applyResourceFilters(resources, filter) {
+  return resources.filter((resource) => {
+    const meta = getResourceFilterMeta(resource);
+    if (!resourceMatchesQuery(resource, filter.query)) return false;
+    if (filter.scope && meta.scopeId !== filter.scope) return false;
+    if (filter.tag && meta.tagId !== filter.tag) return false;
+    return true;
+  });
+}
+
+function getProfileBaseResources(context = state.profileTab) {
+  if (context === "favorites") {
+    return [...state.favoriteIds].map(getResourceById).filter(Boolean);
+  }
+  return state.publications;
+}
+
+function getFilterBaseResources(context) {
+  return context === "all" ? getIssueResources() : getProfileBaseResources(context);
+}
+
+function getFilteredResources(context) {
+  return applyResourceFilters(getFilterBaseResources(context), state.filters[context]);
+}
+
+function getCurrentResources() {
+  if (state.mode === "featured") return getLatestIssue().resources;
+  if (state.mode === "all") return getFilteredResources("all");
+  return [];
 }
 
 function getCurrentRange() {
@@ -375,11 +767,118 @@ async function requestJson(path, options = {}) {
   return response.json();
 }
 
+function clonePreviewValue(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function readPreviewData(key, fallbackValue) {
+  try {
+    const stored = window.localStorage.getItem(key);
+    if (!stored) return clonePreviewValue(fallbackValue);
+    return JSON.parse(stored);
+  } catch (error) {
+    return clonePreviewValue(fallbackValue);
+  }
+}
+
+function writePreviewData(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    if (key === previewStorageKeys.comments) previewMemory.comments = value;
+    if (key === previewStorageKeys.favorites) previewMemory.favorites = value;
+  }
+}
+
+function getPreviewCommentsStore() {
+  const stored = readPreviewData(
+    previewStorageKeys.comments,
+    previewMemory.comments
+  );
+  return stored && typeof stored === "object" ? stored : {};
+}
+
+function getPreviewFavorites() {
+  const stored = readPreviewData(
+    previewStorageKeys.favorites,
+    previewMemory.favorites
+  );
+  return Array.isArray(stored) ? stored : [];
+}
+
+function getPreviewCommentCounts() {
+  const commentsByResource = getPreviewCommentsStore();
+  return new Map(
+    Object.entries(commentsByResource).map(([resourceId, comments]) => [
+      resourceId,
+      Array.isArray(comments) ? comments.length : 0
+    ])
+  );
+}
+
+async function fetchResourceComments(resourceId) {
+  if (!isStandalonePreview) {
+    return requestJson(`/api/comments/${encodeURIComponent(resourceId)}`);
+  }
+
+  const comments = getPreviewCommentsStore()[resourceId] || [];
+  return { comments, count: comments.length };
+}
+
+async function createResourceComment(resourceId, payload) {
+  if (!isStandalonePreview) {
+    return requestJson(`/api/comments/${encodeURIComponent(resourceId)}`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  const commentsByResource = getPreviewCommentsStore();
+  const allComments = Object.values(commentsByResource).flat();
+  const nextId =
+    allComments.reduce(
+      (largestId, comment) => Math.max(largestId, Number(comment.id) || 0),
+      0
+    ) + 1;
+  const comment = {
+    id: nextId,
+    resourceId,
+    parentId: payload.parentId ?? null,
+    content: payload.content,
+    displayName: state.session?.displayName || previewUser.displayName,
+    avatar: state.session?.avatar || "",
+    positionX: payload.parentId == null ? payload.positionX ?? null : null,
+    positionY: payload.parentId == null ? payload.positionY ?? null : null,
+    createdAt: new Date().toISOString()
+  };
+  const comments = [...(commentsByResource[resourceId] || []), comment];
+  commentsByResource[resourceId] = comments;
+  previewMemory.comments = commentsByResource;
+  writePreviewData(previewStorageKeys.comments, commentsByResource);
+  return comment;
+}
+
 async function loadMemberData() {
+  if (isStandalonePreview) {
+    state.session = previewUser;
+    state.sessionState = "ready";
+    state.favoriteIds = new Set(getPreviewFavorites());
+    state.publications = [];
+    state.commentCounts = getPreviewCommentCounts();
+    updateSessionUI();
+    updateCommentPointIdentity();
+    syncFavoriteButtons();
+    syncCommentButtons();
+    renderProfile();
+    loadActiveResourceComments();
+    return;
+  }
+
   try {
     state.session = await requestJson("/api/session/me");
     state.sessionState = "ready";
     updateSessionUI();
+    updateCommentPointIdentity();
 
     const [favoritesPayload, publicationsPayload, commentCountsPayload] = await Promise.all([
       requestJson("/api/favorites"),
@@ -392,10 +891,13 @@ async function loadMemberData() {
     syncFavoriteButtons();
     syncCommentButtons();
     renderProfile();
+    loadActiveResourceComments();
   } catch (error) {
     state.sessionState = "unavailable";
     updateSessionUI();
+    updateCommentPointIdentity();
     renderProfile();
+    renderCommentPins();
   }
 }
 
@@ -410,13 +912,20 @@ async function toggleFavorite(resource, button) {
   button.disabled = true;
 
   try {
-    await requestJson(`/api/favorites/${encodeURIComponent(resourceId)}`, {
-      method: wasFavorite ? "DELETE" : "POST"
-    });
+    if (!isStandalonePreview) {
+      await requestJson(`/api/favorites/${encodeURIComponent(resourceId)}`, {
+        method: wasFavorite ? "DELETE" : "POST"
+      });
+    }
     if (wasFavorite) {
       state.favoriteIds.delete(resourceId);
     } else {
       state.favoriteIds.add(resourceId);
+    }
+    if (isStandalonePreview) {
+      const favorites = [...state.favoriteIds];
+      previewMemory.favorites = favorites;
+      writePreviewData(previewStorageKeys.favorites, favorites);
     }
     syncFavoriteButtons();
     renderProfile();
@@ -446,7 +955,10 @@ function updateCommentButton(button, resourceId) {
   const badge = button.querySelector(".comment-count");
   badge.textContent = count > 99 ? "99+" : String(count);
   badge.hidden = count === 0;
-  button.setAttribute("aria-label", count ? `查看 ${count} 条评论` : "查看评论");
+  button.setAttribute(
+    "aria-label",
+    count ? `放置评论，当前作品已有 ${count} 条评论` : "在当前作品上放置评论"
+  );
 }
 
 function syncCommentButtons() {
@@ -454,12 +966,193 @@ function syncCommentButtons() {
     state.mode === "featured" ? getCurrentResources()[state.activeIndex] : null;
   if (!resource) {
     featuredCommentButton.dataset.resourceId = "";
+    commentPinLayer.replaceChildren();
     return;
   }
 
   const resourceId = getResourceId(resource);
   featuredCommentButton.dataset.resourceId = resourceId;
+  featuredCommentButton.classList.toggle("is-placing", state.commentPlacementActive);
+  featuredCommentButton.setAttribute("aria-pressed", String(state.commentPlacementActive));
+  featuredCommentButton.setAttribute("aria-expanded", "false");
+  featuredCommentButton.querySelector(".comment-button-hint").textContent =
+    state.commentPlacementActive ? "点击页面放置" : "点击后放置评论";
   updateCommentButton(featuredCommentButton, resourceId);
+  renderCommentPins();
+}
+
+function hasActiveFilter(filter) {
+  return Boolean(filter.query.trim() || filter.scope || filter.tag);
+}
+
+function buildFilterPanel(panel, context) {
+  panel.dataset.filterContext = context;
+  panel.innerHTML = `
+    <div class="resource-filter-main">
+      <label class="filter-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+        <span class="sr-only">搜索案例</span>
+        <input
+          class="filter-search-input"
+          type="search"
+          autocomplete="off"
+          placeholder="搜索名称、用途或工具"
+        />
+      </label>
+      <div class="filter-scope-list" role="group" aria-label="内容范围"></div>
+      <div class="filter-status" aria-live="polite">
+        <strong class="filter-result-count"></strong>
+        <button class="filter-reset" type="button" hidden>重置</button>
+      </div>
+    </div>
+    <div class="filter-detail-row" hidden>
+      <span class="filter-detail-label"></span>
+      <div class="filter-tag-list" role="group" aria-label="具体方向"></div>
+    </div>
+  `;
+
+  if (panel.dataset.filterBound === "true") return;
+  panel.dataset.filterBound = "true";
+
+  panel.addEventListener("input", (event) => {
+    if (!event.target.matches(".filter-search-input")) return;
+    const activeContext = panel.dataset.filterContext;
+    state.filters[activeContext].query = event.target.value;
+    state.activeIndex = 0;
+    renderFilteredContext(activeContext);
+  });
+
+  panel.addEventListener("click", (event) => {
+    const activeContext = panel.dataset.filterContext;
+    const filter = state.filters[activeContext];
+    const resetButton = event.target.closest(".filter-reset");
+    const scopeButton = event.target.closest("[data-filter-scope]");
+    const tagButton = event.target.closest("[data-filter-tag]");
+
+    if (resetButton) {
+      filter.query = "";
+      filter.scope = "";
+      filter.tag = "";
+      const input = panel.querySelector(".filter-search-input");
+      if (input) input.value = "";
+    } else if (scopeButton) {
+      filter.scope = scopeButton.dataset.filterScope;
+      filter.tag = "";
+    } else if (tagButton) {
+      filter.tag = tagButton.dataset.filterTag;
+    } else {
+      return;
+    }
+
+    state.activeIndex = 0;
+    renderFilteredContext(activeContext);
+  });
+}
+
+function syncFilterPanel(panel, context) {
+  if (panel.dataset.filterContext !== context) buildFilterPanel(panel, context);
+
+  const filter = state.filters[context];
+  const baseResources = getFilterBaseResources(context);
+  const queryResources = baseResources.filter((resource) =>
+    resourceMatchesQuery(resource, filter.query)
+  );
+  const selectedScope = getTaxonomyScope(filter.scope);
+
+  if (!selectedScope) {
+    filter.scope = "";
+    filter.tag = "";
+  } else if (filter.tag && !selectedScope.tags.some((tag) => tag.id === filter.tag)) {
+    filter.tag = "";
+  }
+
+  if (context === "all") {
+    appShell.classList.toggle("has-detail-filter", Boolean(selectedScope));
+  }
+
+  const input = panel.querySelector(".filter-search-input");
+  if (input && document.activeElement !== input) input.value = filter.query;
+
+  const scopeList = panel.querySelector(".filter-scope-list");
+  const allScopeButton = document.createElement("button");
+  allScopeButton.className = "filter-chip";
+  allScopeButton.type = "button";
+  allScopeButton.dataset.filterScope = "";
+  allScopeButton.setAttribute("aria-pressed", String(!filter.scope));
+  allScopeButton.classList.toggle("is-active", !filter.scope);
+  allScopeButton.innerHTML = `${filterScopeIcons.all}<span>全部范围</span><small>${queryResources.length}</small>`;
+
+  const scopeButtons = filterTaxonomy.map((scope) => {
+    const count = queryResources.filter(
+      (resource) => getResourceFilterMeta(resource).scopeId === scope.id
+    ).length;
+    const button = document.createElement("button");
+    button.className = "filter-chip";
+    button.type = "button";
+    button.dataset.filterScope = scope.id;
+    button.disabled = count === 0 && filter.scope !== scope.id;
+    button.setAttribute("aria-pressed", String(filter.scope === scope.id));
+    button.classList.toggle("is-active", filter.scope === scope.id);
+    button.innerHTML = `${filterScopeIcons[scope.id] || ""}<span>${scope.label}</span><small>${count}</small>`;
+    return button;
+  });
+  scopeList.replaceChildren(allScopeButton, ...scopeButtons);
+
+  const detailRow = panel.querySelector(".filter-detail-row");
+  const detailLabel = panel.querySelector(".filter-detail-label");
+  const tagList = panel.querySelector(".filter-tag-list");
+  detailRow.hidden = !selectedScope;
+  panel.classList.toggle("has-detail", Boolean(selectedScope));
+
+  if (selectedScope) {
+    const scopedResources = queryResources.filter(
+      (resource) => getResourceFilterMeta(resource).scopeId === selectedScope.id
+    );
+    detailLabel.textContent = "具体方向";
+
+    const allTagButton = document.createElement("button");
+    allTagButton.className = "filter-chip filter-chip-secondary";
+    allTagButton.type = "button";
+    allTagButton.dataset.filterTag = "";
+    allTagButton.setAttribute("aria-pressed", String(!filter.tag));
+    allTagButton.classList.toggle("is-active", !filter.tag);
+    allTagButton.innerHTML = `<span>全部</span><small>${scopedResources.length}</small>`;
+
+    const tagButtons = selectedScope.tags.map((tag) => {
+      const count = scopedResources.filter(
+        (resource) => getResourceFilterMeta(resource).tagId === tag.id
+      ).length;
+      const button = document.createElement("button");
+      button.className = "filter-chip filter-chip-secondary";
+      button.type = "button";
+      button.dataset.filterTag = tag.id;
+      button.disabled = count === 0 && filter.tag !== tag.id;
+      button.setAttribute("aria-pressed", String(filter.tag === tag.id));
+      button.classList.toggle("is-active", filter.tag === tag.id);
+      button.innerHTML = `<span>${tag.label}</span><small>${count}</small>`;
+      return button;
+    });
+    tagList.replaceChildren(allTagButton, ...tagButtons);
+  } else {
+    tagList.replaceChildren();
+  }
+
+  const resultCount = getFilteredResources(context).length;
+  panel.querySelector(".filter-result-count").textContent = `${resultCount} 个结果`;
+  panel.querySelector(".filter-reset").hidden = !hasActiveFilter(filter);
+}
+
+function renderFilteredContext(context) {
+  if (context === "all" && state.mode === "all") {
+    renderCards();
+    return;
+  }
+  if (state.mode === "profile" && context === state.profileTab) {
+    renderProfile();
+  }
 }
 
 function makeProfileResourceCard(resource, options = {}) {
@@ -475,9 +1168,17 @@ function makeProfileResourceCard(resource, options = {}) {
   const body = document.createElement("div");
   body.className = "profile-resource-body";
 
-  const meta = document.createElement("span");
-  meta.className = "category";
-  meta.textContent = resource.category || "设计资源";
+  const filterMeta = getResourceFilterMeta(resource);
+  const meta = document.createElement("div");
+  meta.className = "profile-resource-meta";
+
+  const scope = makeCategoryTag(resource, filterMeta.scopeLabel);
+
+  const tag = document.createElement("span");
+  tag.className = "profile-filter-tag";
+  tag.textContent = filterMeta.tagLabel;
+
+  meta.append(scope, tag);
 
   const title = document.createElement("h3");
   title.textContent = resource.title;
@@ -524,6 +1225,7 @@ function renderProfileEmpty(title, description) {
 
 function renderProfile() {
   syncFavoriteButtons();
+  profileFilterPanel.classList.add("is-hidden");
   profileTabButtons.forEach((button) => {
     const selected = button.dataset.profileTab === state.profileTab;
     button.classList.toggle("is-active", selected);
@@ -540,17 +1242,25 @@ function renderProfile() {
     return;
   }
 
-  const resources =
-    state.profileTab === "favorites"
-      ? [...state.favoriteIds].map(getResourceById).filter(Boolean)
-      : state.publications;
+  const baseResources = getProfileBaseResources();
+  profileFilterPanel.classList.remove("is-hidden");
+  syncFilterPanel(profileFilterPanel, state.profileTab);
 
-  if (!resources.length) {
+  if (!baseResources.length) {
     renderProfileEmpty(
       state.profileTab === "favorites" ? "还没有收藏案例" : "还没有发布内容",
       state.profileTab === "favorites"
         ? "在案例卡片右上角点击收藏图标，内容会保存在这里。"
         : "你发布到资源库的内容会按时间显示在这里。"
+    );
+    return;
+  }
+
+  const resources = getFilteredResources(state.profileTab);
+  if (!resources.length) {
+    renderProfileEmpty(
+      "没有匹配的案例",
+      "调整关键词或筛选范围，或点击上方“清除”恢复全部内容。"
     );
     return;
   }
@@ -574,19 +1284,128 @@ function formatCommentTime(value) {
   });
 }
 
+function setCommentAvatarVisual(container, person) {
+  container.replaceChildren();
+  if (person.avatar) {
+    const image = document.createElement("img");
+    image.src = person.avatar;
+    image.alt = "";
+    image.referrerPolicy = "no-referrer";
+    container.appendChild(image);
+    return;
+  }
+  container.textContent = getDisplayInitials(person.displayName);
+}
+
 function createCommentAvatar(comment) {
   const avatar = document.createElement("div");
   avatar.className = "comment-avatar";
-  if (comment.avatar) {
-    const image = document.createElement("img");
-    image.src = comment.avatar;
-    image.alt = "";
-    image.referrerPolicy = "no-referrer";
-    avatar.appendChild(image);
-  } else {
-    avatar.textContent = getDisplayInitials(comment.displayName);
-  }
+  setCommentAvatarVisual(avatar, comment);
   return avatar;
+}
+
+function getCommentTree(comments) {
+  const childrenByParent = new Map();
+  const roots = [];
+
+  comments.forEach((comment) => {
+    if (comment.parentId == null) {
+      roots.push(comment);
+      return;
+    }
+    const key = String(comment.parentId);
+    if (!childrenByParent.has(key)) childrenByParent.set(key, []);
+    childrenByParent.get(key).push(comment);
+  });
+
+  return { roots, childrenByParent };
+}
+
+function countCommentThread(comment, childrenByParent) {
+  const children = childrenByParent.get(String(comment.id)) || [];
+  return 1 + children.reduce(
+    (count, child) => count + countCommentThread(child, childrenByParent),
+    0
+  );
+}
+
+function getCommentPosition(comment, index) {
+  const positionX = Number(comment.positionX);
+  const positionY = Number(comment.positionY);
+  if (
+    Number.isFinite(positionX) &&
+    Number.isFinite(positionY) &&
+    positionX >= 0 &&
+    positionX <= 1 &&
+    positionY >= 0 &&
+    positionY <= 1
+  ) {
+    return { x: positionX, y: positionY };
+  }
+
+  const fallbackPositions = [
+    { x: 0.76, y: 0.22 },
+    { x: 0.28, y: 0.3 },
+    { x: 0.72, y: 0.48 },
+    { x: 0.24, y: 0.58 },
+    { x: 0.68, y: 0.7 }
+  ];
+  return fallbackPositions[index % fallbackPositions.length];
+}
+
+function renderCommentPins() {
+  commentPinLayer.replaceChildren();
+  if (state.mode !== "featured") return;
+
+  const resource = getCurrentResources()[state.activeIndex];
+  if (!resource) return;
+
+  const resourceId = getResourceId(resource);
+  const comments = state.commentCache.get(resourceId) || [];
+  const { roots, childrenByParent } = getCommentTree(comments);
+  const fragment = document.createDocumentFragment();
+
+  roots.forEach((comment, index) => {
+    const position = getCommentPosition(comment, index);
+    const threadCount = countCommentThread(comment, childrenByParent);
+    const pin = document.createElement("button");
+    pin.className = "comment-pin";
+    pin.type = "button";
+    pin.style.left = `${position.x * 100}%`;
+    pin.style.top = `${position.y * 100}%`;
+    pin.classList.toggle("is-flipped", position.x > 0.66);
+    pin.classList.toggle(
+      "is-active",
+      commentLayer.classList.contains("is-open") &&
+        state.commentThreadRootId === comment.id
+    );
+    pin.setAttribute(
+      "aria-label",
+      `查看 ${comment.displayName} 的 ${threadCount} 条讨论`
+    );
+
+    const avatarWrap = document.createElement("span");
+    avatarWrap.className = "comment-pin-avatar-wrap";
+    const avatar = document.createElement("span");
+    avatar.className = "comment-pin-avatar";
+    setCommentAvatarVisual(avatar, comment);
+    const count = document.createElement("span");
+    count.className = "comment-pin-count";
+    count.textContent = threadCount > 99 ? "99+" : String(threadCount);
+    avatarWrap.append(avatar, count);
+
+    const name = document.createElement("span");
+    name.className = "comment-pin-name";
+    name.textContent = comment.displayName;
+    pin.append(avatarWrap, name);
+    pin.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openComments(resource, comment.id, position, pin);
+    });
+    fragment.appendChild(pin);
+  });
+
+  commentPinLayer.appendChild(fragment);
 }
 
 function startReply(comment) {
@@ -655,6 +1474,9 @@ function renderCommentMessage(title, description) {
   copy.textContent = description;
   empty.append(heading, copy);
   commentList.replaceChildren(empty);
+  if (commentLayer.classList.contains("is-open")) {
+    requestAnimationFrame(() => positionCommentPopover());
+  }
 }
 
 function renderComments() {
@@ -669,83 +1491,407 @@ function renderComments() {
   }
 
   if (!state.comments.length) {
-    renderCommentMessage("还没有评论", "成为第一个分享看法的人。");
+    renderCommentMessage("还没有评论", "关闭详情后，点击评论按钮在页面上放置第一条评论。");
     return;
   }
 
-  const childrenByParent = new Map();
-  const roots = [];
-  state.comments.forEach((comment) => {
-    if (comment.parentId == null) {
-      roots.push(comment);
-      return;
-    }
-    const key = String(comment.parentId);
-    if (!childrenByParent.has(key)) childrenByParent.set(key, []);
-    childrenByParent.get(key).push(comment);
-  });
+  const { roots, childrenByParent } = getCommentTree(state.comments);
+  const visibleRoots = state.commentThreadRootId == null
+    ? roots
+    : roots.filter((comment) => comment.id === state.commentThreadRootId);
+
+  if (!visibleRoots.length) {
+    renderCommentMessage("评论不存在", "这条评论可能已被移除，请关闭后重新选择。");
+    return;
+  }
+
+  const selectedRoot = visibleRoots[0];
+  if (state.commentResource) {
+    commentResourceLabel.textContent = state.commentResource.title;
+    commentDrawerTitle.textContent = `${selectedRoot.displayName} 的讨论`;
+  }
 
   const fragment = document.createDocumentFragment();
-  roots.forEach((comment) => {
+  visibleRoots.forEach((comment) => {
     fragment.appendChild(createCommentItem(comment, childrenByParent));
   });
   commentList.replaceChildren(fragment);
+  if (commentLayer.classList.contains("is-open")) {
+    requestAnimationFrame(() => positionCommentPopover());
+  }
 }
 
-async function loadComments(resource) {
-  state.commentsState = "loading";
-  renderComments();
+async function loadComments(resource, { force = false } = {}) {
+  const resourceId = getResourceId(resource);
+  const cached = state.commentCache.get(resourceId);
+  if (cached && !force) {
+    if (
+      state.commentResource &&
+      getResourceId(state.commentResource) === resourceId
+    ) {
+      state.comments = cached;
+      state.commentsState = "ready";
+      renderComments();
+    }
+    renderCommentPins();
+    return cached;
+  }
 
   if (state.sessionState !== "ready") {
-    state.commentsState = "unavailable";
+    if (
+      state.commentResource &&
+      getResourceId(state.commentResource) === resourceId
+    ) {
+      state.commentsState = "unavailable";
+      renderComments();
+    }
+    renderCommentPins();
+    return [];
+  }
+
+  const requestToken = ++state.commentLoadToken;
+  if (
+    state.commentResource &&
+    getResourceId(state.commentResource) === resourceId
+  ) {
+    state.commentsState = "loading";
     renderComments();
-    return;
   }
 
   try {
-    const resourceId = getResourceId(resource);
-    const payload = await requestJson(`/api/comments/${encodeURIComponent(resourceId)}`);
-    state.comments = payload.comments || [];
-    state.commentsState = "ready";
-    state.commentCounts.set(resourceId, Number(payload.count || state.comments.length));
+    const payload = await fetchResourceComments(resourceId);
+    const comments = payload.comments || [];
+    state.commentCache.set(resourceId, comments);
+    state.commentCounts.set(resourceId, Number(payload.count || comments.length));
     syncCommentButtons();
-    renderComments();
+    if (
+      state.commentResource &&
+      getResourceId(state.commentResource) === resourceId
+    ) {
+      state.comments = comments;
+      state.commentsState = "ready";
+      renderComments();
+    }
+    if (requestToken === state.commentLoadToken) renderCommentPins();
+    return comments;
   } catch (error) {
-    state.commentsState = "unavailable";
-    renderComments();
+    if (
+      state.commentResource &&
+      getResourceId(state.commentResource) === resourceId
+    ) {
+      state.commentsState = "unavailable";
+      renderComments();
+    }
+    return [];
   }
 }
 
-function openComments(resource) {
+function loadActiveResourceComments({ force = false } = {}) {
+  if (state.mode !== "featured") {
+    renderCommentPins();
+    return;
+  }
+  const resource = getCurrentResources()[state.activeIndex];
+  if (!resource) return;
+  loadComments(resource, { force });
+}
+
+function updateCommentPointIdentity() {
+  if (state.sessionState !== "ready" || !state.session) {
+    commentPointAvatar.replaceChildren();
+    commentPointName.textContent = "";
+    return;
+  }
+  setCommentAvatarVisual(commentPointAvatar, state.session);
+  commentPointName.textContent = state.session.displayName;
+}
+
+function updateCommentPlacementUI() {
+  const active = state.commentPlacementActive && state.mode === "featured";
+  commentPlacementSurface.hidden = !active;
+  commentPlacementHint.hidden = !active || Boolean(state.pendingCommentPoint);
+  stage.classList.toggle("is-comment-placing", active);
+  if (!active) {
+    commentPointForm.hidden = true;
+    commentPointInput.value = "";
+  }
+  syncCommentButtons();
+}
+
+function cancelCommentPlacement({ restoreFocus = false } = {}) {
+  const wasActive = state.commentPlacementActive;
+  state.commentPlacementActive = false;
+  state.pendingCommentPoint = null;
+  updateCommentPlacementUI();
+  if (restoreFocus && wasActive) featuredCommentButton.focus();
+}
+
+function toggleCommentPlacement() {
+  const resource = getCurrentResources()[state.activeIndex];
+  if (state.mode !== "featured" || !resource) return;
+
+  if (state.sessionState !== "ready") {
+    openComments(resource, null);
+    return;
+  }
+
+  if (commentLayer.classList.contains("is-open")) closeComments();
+  state.commentPlacementActive = !state.commentPlacementActive;
+  state.pendingCommentPoint = null;
+  updateCommentPointIdentity();
+  updateCommentPlacementUI();
+}
+
+function placeCommentComposer(event) {
+  if (!state.commentPlacementActive) return;
+
+  const stageRect = stage.getBoundingClientRect();
+  const hasPointerPosition = event.clientX > 0 || event.clientY > 0;
+  const clientX = hasPointerPosition
+    ? event.clientX
+    : stageRect.left + stageRect.width / 2;
+  const clientY = hasPointerPosition
+    ? event.clientY
+    : stageRect.top + stageRect.height / 2;
+  const x = Math.min(Math.max((clientX - stageRect.left) / stageRect.width, 0.02), 0.98);
+  const y = Math.min(Math.max((clientY - stageRect.top) / stageRect.height, 0.04), 0.96);
+  state.pendingCommentPoint = { x, y };
+
+  commentPlacementHint.hidden = true;
+  commentPointForm.hidden = false;
+  commentPointForm.style.left = "8px";
+  commentPointForm.style.top = "8px";
+
+  requestAnimationFrame(() => {
+    const composerWidth = commentPointForm.offsetWidth;
+    const composerHeight = commentPointForm.offsetHeight;
+    const anchorX = x * stageRect.width;
+    const anchorY = y * stageRect.height;
+    const preferredLeft = x > 0.62
+      ? anchorX - composerWidth - 14
+      : anchorX + 14;
+    const preferredTop = y > 0.62
+      ? anchorY - composerHeight - 14
+      : anchorY + 14;
+    const left = Math.min(
+      Math.max(preferredLeft, 8),
+      Math.max(8, stageRect.width - composerWidth - 8)
+    );
+    const top = Math.min(
+      Math.max(preferredTop, 8),
+      Math.max(8, stageRect.height - composerHeight - 8)
+    );
+    commentPointForm.style.left = `${left}px`;
+    commentPointForm.style.top = `${top}px`;
+    commentPointInput.focus();
+  });
+}
+
+async function submitPointComment(event) {
+  event.preventDefault();
+  const resource = getCurrentResources()[state.activeIndex];
+  if (
+    state.sessionState !== "ready" ||
+    !resource ||
+    !state.pendingCommentPoint
+  ) {
+    return;
+  }
+
+  const content = commentPointInput.value.trim();
+  if (!content) {
+    commentPointInput.focus();
+    return;
+  }
+
+  commentPointSubmit.disabled = true;
+  try {
+    const resourceId = getResourceId(resource);
+    await createResourceComment(resourceId, {
+      content,
+      parentId: null,
+      positionX: state.pendingCommentPoint.x,
+      positionY: state.pendingCommentPoint.y
+    });
+    cancelCommentPlacement();
+    await loadComments(resource, { force: true });
+  } finally {
+    commentPointSubmit.disabled = false;
+  }
+}
+
+function positionCommentPopover(anchorPoint = state.commentAnchorPoint) {
+  const viewportPadding = 12;
+  commentPopover.style.removeProperty("max-height");
+  const popoverWidth = commentPopover.offsetWidth;
+  let popoverHeight = commentPopover.offsetHeight;
+  const maxLeft = Math.max(
+    viewportPadding,
+    window.innerWidth - popoverWidth - viewportPadding
+  );
+
+  let left = (window.innerWidth - popoverWidth) / 2;
+  let top = (window.innerHeight - popoverHeight) / 2;
+
+  const liveAnchor = commentPinLayer.querySelector(".comment-pin.is-active");
+  const anchorElement = liveAnchor || state.commentAnchorElement;
+  const liveAnchorRect = anchorElement?.isConnected
+    ? anchorElement.getBoundingClientRect()
+    : null;
+  const candidateAnchorRect = liveAnchorRect || state.commentAnchorViewport;
+  const anchorRect =
+    candidateAnchorRect &&
+    candidateAnchorRect.width > 0 &&
+    candidateAnchorRect.height > 0
+      ? candidateAnchorRect
+      : null;
+
+  if (anchorRect || anchorPoint) {
+    const stageRect = stage.getBoundingClientRect();
+    const anchorX = anchorRect
+      ? anchorRect.left + anchorRect.width / 2
+      : stageRect.left + anchorPoint.x * stageRect.width;
+    const anchorY = anchorRect
+      ? anchorRect.top + anchorRect.height / 2
+      : stageRect.top + anchorPoint.y * stageRect.height;
+    const anchorLeft = anchorRect ? anchorRect.left : anchorX;
+    const anchorRight = anchorRect ? anchorRect.right : anchorX;
+    const gap = 14;
+    const fitsRight =
+      anchorRight + gap + popoverWidth <= window.innerWidth - viewportPadding;
+    const fitsLeft =
+      anchorLeft - gap - popoverWidth >= viewportPadding;
+
+    if (fitsRight) {
+      left = anchorRight + gap;
+      commentPopover.dataset.placement = "right";
+    } else if (fitsLeft) {
+      left = anchorLeft - gap - popoverWidth;
+      commentPopover.dataset.placement = "left";
+    } else {
+      left = anchorX - popoverWidth / 2;
+      const anchorTop = anchorRect ? anchorRect.top : anchorY;
+      const anchorBottom = anchorRect ? anchorRect.bottom : anchorY;
+      const availableBelow =
+        window.innerHeight - viewportPadding - anchorBottom - gap;
+      const availableAbove = anchorTop - gap - viewportPadding;
+      const opensBelow = availableBelow >= availableAbove;
+      const availableHeight = Math.max(
+        160,
+        opensBelow ? availableBelow : availableAbove
+      );
+      if (popoverHeight > availableHeight) {
+        commentPopover.style.maxHeight = `${availableHeight}px`;
+        popoverHeight = commentPopover.offsetHeight;
+      }
+      top = opensBelow
+        ? anchorBottom + gap
+        : anchorTop - gap - popoverHeight;
+      commentPopover.dataset.placement = opensBelow ? "bottom" : "top";
+    }
+    if (fitsRight || fitsLeft) {
+      top = anchorY - Math.min(72, popoverHeight * 0.2);
+    }
+  }
+
+  const maxTop = Math.max(
+    viewportPadding,
+    window.innerHeight - popoverHeight - viewportPadding
+  );
+  commentPopover.style.left = `${Math.min(Math.max(left, viewportPadding), maxLeft)}px`;
+  commentPopover.style.top = `${Math.min(Math.max(top, viewportPadding), maxTop)}px`;
+}
+
+function openComments(resource, rootId, anchorPoint = null, anchorElement = null) {
+  cancelCommentPlacement();
   state.commentResource = resource;
-  state.comments = [];
+  state.commentThreadRootId = rootId;
+  state.commentAnchorPoint = anchorPoint;
+  state.commentAnchorElement = anchorElement;
+  const anchorRect = anchorElement?.getBoundingClientRect();
+  state.commentAnchorViewport = anchorRect
+    ? {
+        left: anchorRect.left,
+        top: anchorRect.top,
+        width: anchorRect.width,
+        height: anchorRect.height
+      }
+    : null;
+  state.comments = state.commentCache.get(getResourceId(resource)) || [];
+  state.commentsState = state.commentCache.has(getResourceId(resource))
+    ? "ready"
+    : state.sessionState === "ready"
+      ? "loading"
+      : "unavailable";
   clearReply();
   commentInput.value = "";
-  commentResourceLabel.textContent = resource.category;
-  commentDrawerTitle.textContent = resource.title;
+  commentResourceLabel.textContent = resource.title;
+  commentDrawerTitle.textContent = rootId == null ? "作品评论" : "评论详情";
+  renderComments();
   commentLayer.classList.add("is-open");
   commentLayer.setAttribute("aria-hidden", "false");
-  document.body.classList.add("is-comment-open");
-  document.querySelectorAll(".comment-button").forEach((button) => {
-    button.setAttribute(
-      "aria-expanded",
-      String(button.dataset.resourceId === getResourceId(resource))
-    );
-  });
   const canComment = state.sessionState === "ready";
   commentInput.disabled = !canComment;
   commentSubmit.disabled = !canComment;
+  renderCommentPins();
   loadComments(resource);
+  requestAnimationFrame(() => {
+    positionCommentPopover();
+    commentClose.focus({ preventScroll: true });
+  });
 }
 
 function closeComments() {
   commentLayer.classList.remove("is-open");
   commentLayer.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("is-comment-open");
-  document.querySelectorAll(".comment-button").forEach((button) => {
-    button.setAttribute("aria-expanded", "false");
-  });
+  state.commentThreadRootId = null;
+  state.commentAnchorPoint = null;
+  state.commentAnchorElement = null;
+  state.commentAnchorViewport = null;
+  commentPopover.style.removeProperty("left");
+  commentPopover.style.removeProperty("top");
+  commentPopover.style.removeProperty("max-height");
+  delete commentPopover.dataset.placement;
   clearReply();
+  renderCommentPins();
+}
+
+function openResourceDetail(resource, trigger) {
+  if (commentLayer.classList.contains("is-open")) closeComments();
+
+  state.detailResource = resource;
+  state.detailTrigger =
+    trigger instanceof HTMLElement ? trigger : document.activeElement;
+
+  resourceDetailImage.src = resource.coverImage;
+  resourceDetailImage.alt = `${resource.title} 原始页面截图`;
+  resourceDetailVisualLabel.textContent = resource.visualLabel;
+  resourceDetailCategory.replaceChildren(makeCategoryTag(resource));
+  resourceDetailScore.textContent = resource.score;
+  resourceDetailTitle.textContent = resource.title;
+  resourceDetailSummary.textContent = resource.summary;
+  resourceDetailDescription.textContent = resource.description;
+  resourceDetailAction.textContent = resource.action;
+  resourceDetailExternal.href = resource.url;
+  resourceDetailExternal.setAttribute("aria-label", `访问 ${resource.title} 原网站`);
+
+  resourceDetailLayer.classList.add("is-open");
+  resourceDetailLayer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("is-detail-open");
+  requestAnimationFrame(() => resourceDetailClose.focus());
+}
+
+function closeResourceDetail() {
+  if (!resourceDetailLayer.classList.contains("is-open")) return;
+
+  resourceDetailLayer.classList.remove("is-open");
+  resourceDetailLayer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("is-detail-open");
+
+  const trigger = state.detailTrigger;
+  state.detailResource = null;
+  state.detailTrigger = null;
+  if (trigger?.isConnected) trigger.focus();
 }
 
 async function submitComment(event) {
@@ -761,16 +1907,13 @@ async function submitComment(event) {
   commentSubmit.disabled = true;
   try {
     const resourceId = getResourceId(state.commentResource);
-    await requestJson(`/api/comments/${encodeURIComponent(resourceId)}`, {
-      method: "POST",
-      body: JSON.stringify({
-        content,
-        parentId: state.replyingTo?.id ?? null
-      })
+    await createResourceComment(resourceId, {
+      content,
+      parentId: state.replyingTo?.id ?? state.commentThreadRootId ?? null
     });
     commentInput.value = "";
     clearReply();
-    await loadComments(state.commentResource);
+    await loadComments(state.commentResource, { force: true });
     commentList.scrollTo({ top: commentList.scrollHeight, behavior: "smooth" });
   } finally {
     commentSubmit.disabled = false;
@@ -891,9 +2034,18 @@ function animateCardHover(card, index, hovered) {
 
 function makeCard(resource, index) {
   const article = document.createElement("article");
+  const opensDetails = state.mode === "all";
+  const actionControl = opensDetails
+    ? `<button class="open-link detail-link" type="button" aria-label="查看 ${resource.title} 详情">→</button>`
+    : `<a class="open-link" href="${resource.url}" target="_blank" rel="noreferrer" aria-label="打开 ${resource.title}">→</a>`;
+  const scoreControl = opensDetails
+    ? ""
+    : `<span class="score">${resource.score}</span>`;
+
   article.className = "resource-card";
   article.tabIndex = 0;
   article.dataset.index = String(index);
+  if (opensDetails) article.setAttribute("aria-label", `查看 ${resource.title} 详情`);
 
   article.innerHTML = `
     <div class="cover" data-label="${resource.visualLabel}">
@@ -906,12 +2058,12 @@ function makeCard(resource, index) {
     </div>
     <div class="card-body">
       <div class="card-meta">
-        <span class="category">${resource.category}</span>
-        <span class="score">${resource.score}</span>
+        <span class="category"></span>
+        ${scoreControl}
       </div>
       <div class="card-title-row">
         <h2 class="card-title">${resource.title}</h2>
-        <a class="open-link" href="${resource.url}" target="_blank" rel="noreferrer" aria-label="打开 ${resource.title}">→</a>
+        ${actionControl}
       </div>
       <div class="card-details">
         <p class="card-summary">${resource.summary}</p>
@@ -921,6 +2073,8 @@ function makeCard(resource, index) {
     </div>
   `;
 
+  article.querySelector(".category").replaceWith(makeCategoryTag(resource));
+
   const favoriteButton = article.querySelector(".favorite-button");
   favoriteButton.dataset.resourceId = getResourceId(resource);
   updateFavoriteButton(favoriteButton, getResourceId(resource));
@@ -929,16 +2083,36 @@ function makeCard(resource, index) {
     toggleFavorite(resource, favoriteButton);
   });
 
+  const detailButton = article.querySelector(".detail-link");
+  detailButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openResourceDetail(resource, detailButton);
+  });
+
   article.addEventListener("click", (event) => {
     if (event.target.closest("a, button")) return;
-    if (isMasonryMode()) return;
+    if (state.mode === "all") {
+      if (!isMasonryMode() && article.dataset.active !== "true") {
+        setActiveIndex(index);
+        return;
+      }
+      openResourceDetail(resource, article);
+      return;
+    }
     setActiveIndex(index);
   });
 
   article.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
-      if (isMasonryMode()) return;
       event.preventDefault();
+      if (state.mode === "all") {
+        if (!isMasonryMode() && article.dataset.active !== "true") {
+          setActiveIndex(index);
+          return;
+        }
+        openResourceDetail(resource, article);
+        return;
+      }
       setActiveIndex(index);
     }
   });
@@ -958,11 +2132,33 @@ function makeCard(resource, index) {
 
 function renderCards() {
   const resources = getCurrentResources();
+  if (state.mode === "all") syncFilterPanel(allFilterPanel, "all");
+  carousel.classList.toggle(
+    "is-sparse-results",
+    state.mode === "all" && resources.length > 0 && resources.length <= 4
+  );
   carousel.innerHTML = "";
+
+  if (!resources.length) {
+    const empty = document.createElement("div");
+    empty.className = "resource-empty";
+    const title = document.createElement("h2");
+    title.textContent = "没有匹配的案例";
+    const copy = document.createElement("p");
+    copy.textContent = "换一个关键词或筛选方向，或点击上方“重置”查看全部内容。";
+    empty.append(title, copy);
+    carousel.appendChild(empty);
+    syncCommentButtons();
+    loadActiveResourceComments();
+    layoutCards(true);
+    return;
+  }
+
   resources.forEach((resource, index) => {
     carousel.appendChild(makeCard(resource, index));
   });
   syncCommentButtons();
+  loadActiveResourceComments();
   layoutCards(true);
 }
 
@@ -982,7 +2178,7 @@ function layoutCards(isInitial = false) {
       card.classList.remove("is-side", "is-far", "is-hovered");
       card.dataset.active = "false";
       card.setAttribute("aria-hidden", "false");
-      card.tabIndex = -1;
+      card.tabIndex = 0;
       card.style.zIndex = "";
     });
 
@@ -1057,17 +2253,25 @@ function layoutCards(isInitial = false) {
 function setActiveIndex(index) {
   if (isMasonryMode()) return;
   const total = getCurrentResources().length;
+  if (!total) return;
+  cancelCommentPlacement();
+  if (commentLayer.classList.contains("is-open")) closeComments();
   state.activeIndex = (index + total) % total;
   syncCommentButtons();
+  loadActiveResourceComments();
   layoutCards();
 }
 
 function setMode(mode, animate = true) {
+  cancelCommentPlacement();
   if (commentLayer.classList.contains("is-open")) closeComments();
+  if (resourceDetailLayer.classList.contains("is-open")) closeResourceDetail();
   state.mode = mode;
   state.activeIndex = 0;
   const profileMode = mode === "profile";
   appShell.classList.toggle("is-featured-mode", mode === "featured");
+  appShell.classList.toggle("is-all-mode", mode === "all");
+  allFilterPanel.classList.toggle("is-hidden", mode !== "all");
 
   profileView.classList.toggle("is-hidden", !profileMode);
   stage.classList.toggle("is-hidden", profileMode);
@@ -1090,7 +2294,10 @@ function setMode(mode, animate = true) {
     return;
   }
 
-  if (mode === "all") state.issueId = "all";
+  if (mode === "all") {
+    state.issueId = "all";
+    state.layoutMode = "masonry";
+  }
   pageTitle.textContent = mode === "featured" ? "本期精选" : "所有案例";
   issueLabel.textContent = getCurrentRange();
   updateIssueFilterUI();
@@ -1186,8 +2393,7 @@ tabButtons.forEach((button) => {
 profileButton.addEventListener("click", () => setMode("profile"));
 
 featuredCommentButton.addEventListener("click", () => {
-  const resource = getCurrentResources()[state.activeIndex];
-  if (state.mode === "featured" && resource) openComments(resource);
+  toggleCommentPlacement();
 });
 
 profileTabButtons.forEach((button) => {
@@ -1209,6 +2415,14 @@ document.addEventListener("click", (event) => {
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (state.commentPlacementActive) {
+      cancelCommentPlacement({ restoreFocus: true });
+      return;
+    }
+    if (resourceDetailLayer.classList.contains("is-open")) {
+      closeResourceDetail();
+      return;
+    }
     if (commentLayer.classList.contains("is-open")) {
       closeComments();
       return;
@@ -1218,10 +2432,23 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-commentBackdrop.addEventListener("click", closeComments);
+resourceDetailBackdrop.addEventListener("click", closeResourceDetail);
+resourceDetailClose.addEventListener("click", closeResourceDetail);
 commentClose.addEventListener("click", closeComments);
 cancelReply.addEventListener("click", clearReply);
 commentForm.addEventListener("submit", submitComment);
+commentPlacementSurface.addEventListener("click", placeCommentComposer);
+commentPointCancel.addEventListener("click", () => {
+  cancelCommentPlacement({ restoreFocus: true });
+});
+commentPointForm.addEventListener("submit", submitPointComment);
+
+document.addEventListener("pointerdown", (event) => {
+  if (!commentLayer.classList.contains("is-open")) return;
+  if (commentPopover.contains(event.target)) return;
+  if (event.target.closest(".comment-pin")) return;
+  closeComments();
+});
 
 layoutToggle.addEventListener("click", () => {
   setLayoutMode(state.layoutMode === "masonry" ? "stack" : "masonry");
@@ -1236,7 +2463,12 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("resize", () => {
   const nextIsMobile = window.matchMedia("(max-width: 760px)").matches;
   state.isMobile = nextIsMobile;
+  if (state.commentPlacementActive) cancelCommentPlacement();
   layoutCards(true);
+  if (commentLayer.classList.contains("is-open")) {
+    state.commentAnchorViewport = null;
+    positionCommentPopover();
+  }
 });
 
 if (window.gsap) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>设计资源精选</title>
-    <link rel="stylesheet" href="./styles.css?v=29" />
+    <link rel="stylesheet" href="./styles.css?v=45" />
   </head>
   <body>
     <main class="app-shell" aria-live="polite">
@@ -52,9 +52,52 @@
         </div>
       </header>
 
+      <section
+        class="resource-filters is-hidden"
+        id="allFilterPanel"
+        aria-label="筛选所有案例"
+      ></section>
+
       <section class="stage" aria-label="资源案例">
         <div class="carousel" id="carousel"></div>
-        <button class="comment-button featured-comment-button" id="featuredCommentButton" type="button" aria-label="查看评论" aria-expanded="false">
+        <div class="comment-pin-layer" id="commentPinLayer" aria-live="polite"></div>
+        <button
+          class="comment-placement-surface"
+          id="commentPlacementSurface"
+          type="button"
+          aria-label="点击此处放置评论"
+          hidden
+        ></button>
+        <div class="comment-placement-hint" id="commentPlacementHint" hidden>
+          点击任意位置放置评论
+          <span>Esc 退出</span>
+        </div>
+        <form class="comment-point-composer" id="commentPointForm" hidden>
+          <header class="comment-point-author">
+            <div class="comment-point-avatar" id="commentPointAvatar" aria-hidden="true"></div>
+            <div>
+              <span>正在评论</span>
+              <strong id="commentPointName"></strong>
+            </div>
+            <button id="commentPointCancel" type="button" aria-label="取消评论">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18"></path>
+              </svg>
+            </button>
+          </header>
+          <label class="sr-only" for="commentPointInput">在此位置发表评论</label>
+          <textarea
+            id="commentPointInput"
+            maxlength="1000"
+            rows="3"
+            placeholder="写下你对这个位置的看法"
+          ></textarea>
+          <div class="comment-point-actions">
+            <span>评论会固定在这个位置</span>
+            <button id="commentPointSubmit" type="submit">发布</button>
+          </div>
+        </form>
+        <button class="comment-button featured-comment-button" id="featuredCommentButton" type="button" aria-label="放置评论" aria-expanded="false" aria-pressed="false">
           <span class="comment-button-copy">
             <span class="comment-icon-wrap">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -64,7 +107,7 @@
             </span>
             <span>评论</span>
           </span>
-          <span class="comment-button-hint">查看讨论</span>
+          <span class="comment-button-hint">点击后放置评论</span>
         </button>
       </section>
 
@@ -91,6 +134,12 @@
           </button>
         </div>
 
+        <section
+          class="resource-filters profile-filter-panel is-hidden"
+          id="profileFilterPanel"
+          aria-label="筛选我的资源"
+        ></section>
+
         <div class="profile-content" id="profileContent"></div>
       </section>
 
@@ -111,9 +160,76 @@
         </button>
       </div>
 
+      <div class="resource-detail-layer" id="resourceDetailLayer" aria-hidden="true">
+        <button
+          class="resource-detail-backdrop"
+          id="resourceDetailBackdrop"
+          type="button"
+          aria-label="关闭案例详情"
+        ></button>
+        <article
+          class="resource-detail-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="resourceDetailTitle"
+        >
+          <button
+            class="resource-detail-close"
+            id="resourceDetailClose"
+            type="button"
+            aria-label="关闭案例详情"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18"></path>
+            </svg>
+          </button>
+
+          <div class="resource-detail-media">
+            <img id="resourceDetailImage" alt="" />
+            <span id="resourceDetailVisualLabel"></span>
+          </div>
+
+          <div class="resource-detail-content">
+            <div class="resource-detail-meta">
+              <div id="resourceDetailCategory"></div>
+              <strong id="resourceDetailScore"></strong>
+            </div>
+            <h2 id="resourceDetailTitle"></h2>
+            <p class="resource-detail-summary" id="resourceDetailSummary"></p>
+
+            <section class="resource-detail-section">
+              <h3>案例解读</h3>
+              <p id="resourceDetailDescription"></p>
+            </section>
+
+            <section class="resource-detail-section resource-detail-usage">
+              <h3>可以怎么用</h3>
+              <p id="resourceDetailAction"></p>
+            </section>
+
+            <a
+              class="resource-detail-external"
+              id="resourceDetailExternal"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span>访问原网站</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 17 17 7M8 7h9v9"></path>
+              </svg>
+            </a>
+          </div>
+        </article>
+      </div>
+
       <div class="comment-layer" id="commentLayer" aria-hidden="true">
-        <button class="comment-backdrop" id="commentBackdrop" type="button" aria-label="关闭评论"></button>
-        <aside class="comment-drawer" role="dialog" aria-modal="true" aria-labelledby="commentDrawerTitle">
+        <aside
+          class="comment-popover"
+          id="commentPopover"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="commentDrawerTitle"
+        >
           <header class="comment-drawer-header">
             <div>
               <p id="commentResourceLabel">案例讨论</p>
@@ -145,6 +261,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="./app.js?v=14"></script>
+    <script src="./app.js?v=26"></script>
   </body>
 </html>

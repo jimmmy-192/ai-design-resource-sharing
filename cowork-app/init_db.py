@@ -58,8 +58,14 @@ CREATE TABLE IF NOT EXISTS comments (
     owner_id    TEXT        NOT NULL,
     parent_id   BIGINT      REFERENCES comments(id) ON DELETE CASCADE,
     content     TEXT        NOT NULL,
+    position_x  DOUBLE PRECISION,
+    position_y  DOUBLE PRECISION,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE comments
+ADD COLUMN IF NOT EXISTS position_x DOUBLE PRECISION;
+ALTER TABLE comments
+ADD COLUMN IF NOT EXISTS position_y DOUBLE PRECISION;
 CREATE INDEX IF NOT EXISTS idx_comments_resource_created
 ON comments (resource_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_comments_parent

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import psycopg
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -19,6 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent
 class CommentCreate(BaseModel):
     content: str
     parentId: Optional[int] = None
+    positionX: Optional[float] = None
+    positionY: Optional[float] = None
 
 
 def _load_props(path: str) -> dict[str, str]:
@@ -115,6 +117,8 @@ def _serialize_comment(row: dict) -> dict:
         "content": row["content"],
         "displayName": row["display_name"],
         "avatar": row["avatar_url"],
+        "positionX": row.get("position_x"),
+        "positionY": row.get("position_y"),
         "createdAt": row["created_at"].isoformat(),
     }
 
@@ -201,11 +205,15 @@ def create_favorite(
     return JSONResponse({"resourceId": clean_resource_id, "saved": True}, status_code=201)
 
 
-@app.delete("/api/favorites/{resource_id}", status_code=204)
+@app.delete(
+    "/api/favorites/{resource_id}",
+    status_code=204,
+    response_class=Response,
+)
 def delete_favorite(
     resource_id: str,
     decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
-) -> None:
+) -> Response:
     user = _require_user(decrypted_userinfo)
     with _get_db_conn() as conn:
         conn.execute(
@@ -213,6 +221,7 @@ def delete_favorite(
             (user["userId"], resource_id),
         )
         conn.commit()
+    return Response(status_code=204)
 
 
 @app.get("/api/publications")
@@ -288,6 +297,8 @@ def list_comments(
               c.resource_id,
               c.parent_id,
               c.content,
+              c.position_x,
+              c.position_y,
               c.created_at,
               u.display_name,
               u.avatar_url
@@ -317,6 +328,18 @@ def create_comment(
         raise HTTPException(status_code=400, detail="invalid resource id")
     if not content or len(content) > 1000:
         raise HTTPException(status_code=400, detail="comment must be 1-1000 characters")
+    position_x = payload.positionX
+    position_y = payload.positionY
+    if payload.parentId is None:
+        has_x = position_x is not None
+        has_y = position_y is not None
+        if has_x != has_y:
+            raise HTTPException(status_code=400, detail="comment position is incomplete")
+        if has_x and not (0 <= position_x <= 1 and 0 <= position_y <= 1):
+            raise HTTPException(status_code=400, detail="comment position is out of range")
+    else:
+        position_x = None
+        position_y = None
 
     with _get_db_conn() as conn:
         _upsert_user(conn, user)
@@ -330,11 +353,32 @@ def create_comment(
 
         row = conn.execute(
             """
-            INSERT INTO comments (resource_id, owner_id, parent_id, content)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id, resource_id, parent_id, content, created_at
+            INSERT INTO comments (
+              resource_id,
+              owner_id,
+              parent_id,
+              content,
+              position_x,
+              position_y
+            )
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING
+              id,
+              resource_id,
+              parent_id,
+              content,
+              position_x,
+              position_y,
+              created_at
             """,
-            (clean_resource_id, user["userId"], payload.parentId, content),
+            (
+                clean_resource_id,
+                user["userId"],
+                payload.parentId,
+                content,
+                position_x,
+                position_y,
+            ),
         ).fetchone()
         conn.commit()
 
