@@ -27,7 +27,8 @@ if [ "1" = "1" ]; then
       #      新建 .venv 没有 pip → `. .venv/bin/activate` 后 PATH 上 `pip: command not found`
       #   2) pip 装出来的 console_script shebang 写死创建时 venv 绝对路径，guard-rust
       #      启动期 fs::rename 工程目录后 execve ENOENT
-      # 镜像源不写死在脚本里；如需走内部 mirror，在 Pod env 设 PIP_INDEX_URL / PIP_TRUSTED_HOST。
+      # 内部镜像主机为 pypi.devops.xiaohongshu.com；由 Pod env 注入
+      # PIP_INDEX_URL / PIP_TRUSTED_HOST，不在命令里重复写死。
       echo "[install] step: pip install (use ambient pip from /opt/venv on Pod) in $(pwd)"
       python3 -m pip install --no-cache-dir -r requirements.txt 2>&1
     fi
