@@ -2071,20 +2071,6 @@ body.is-masonry-view {
   min-width: 0;
 }
 
-.profile-filter-tag {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 3px 8px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-
 .profile-resource-body h3,
 .profile-resource-body p {
   margin: 0;
@@ -2863,7 +2849,28 @@ body.is-publication-open {
   white-space: pre-wrap;
 }
 
-.comment-reply {
+.comment-item.is-deleted .comment-avatar {
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.comment-item.is-deleted .comment-body p {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.comment-reply,
+.comment-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 0;
   color: var(--muted);
   cursor: pointer;
@@ -2875,6 +2882,25 @@ body.is-publication-open {
 
 .comment-reply:hover {
   color: var(--accent);
+}
+
+.comment-delete:hover {
+  color: #b24d34;
+}
+
+.comment-delete:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+.comment-delete svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .comment-empty {

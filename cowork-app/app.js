@@ -873,7 +873,9 @@ function getPreviewCommentCounts() {
   return new Map(
     Object.entries(commentsByResource).map(([resourceId, comments]) => [
       resourceId,
-      Array.isArray(comments) ? comments.length : 0
+      Array.isArray(comments)
+        ? comments.filter((comment) => !comment.isDeleted).length
+        : 0
     ])
   );
 }
@@ -883,8 +885,25 @@ async function fetchResourceComments(resourceId) {
     return requestJson(`/api/comments/${encodeURIComponent(resourceId)}`);
   }
 
-  const comments = getPreviewCommentsStore()[resourceId] || [];
-  return { comments, count: comments.length };
+  const viewerId = state.session?.userId || previewUser.userId;
+  const comments = (getPreviewCommentsStore()[resourceId] || []).map((comment) => {
+    const ownerId =
+      comment.ownerId ||
+      (comment.displayName === previewUser.displayName ? previewUser.userId : "");
+    return {
+      ...comment,
+      ownerId,
+      content: comment.isDeleted ? "该评论已删除" : comment.content,
+      displayName: comment.isDeleted ? "已删除评论" : comment.displayName,
+      avatar: comment.isDeleted ? "" : comment.avatar,
+      isDeleted: Boolean(comment.isDeleted),
+      canDelete: !comment.isDeleted && ownerId === viewerId
+    };
+  });
+  return {
+    comments,
+    count: comments.filter((comment) => !comment.isDeleted).length
+  };
 }
 
 async function createResourceComment(resourceId, payload) {
@@ -909,15 +928,60 @@ async function createResourceComment(resourceId, payload) {
     content: payload.content,
     displayName: state.session?.displayName || previewUser.displayName,
     avatar: state.session?.avatar || "",
+    ownerId: state.session?.userId || previewUser.userId,
     positionX: payload.parentId == null ? payload.positionX ?? null : null,
     positionY: payload.parentId == null ? payload.positionY ?? null : null,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    isDeleted: false,
+    canDelete: true
   };
   const comments = [...(commentsByResource[resourceId] || []), comment];
   commentsByResource[resourceId] = comments;
   previewMemory.comments = commentsByResource;
   writePreviewData(previewStorageKeys.comments, commentsByResource);
   return comment;
+}
+
+async function deleteResourceComment(resourceId, commentId) {
+  if (!isStandalonePreview) {
+    return requestJson(
+      `/api/comments/${encodeURIComponent(resourceId)}/${encodeURIComponent(commentId)}`,
+      { method: "DELETE" }
+    );
+  }
+
+  const commentsByResource = getPreviewCommentsStore();
+  const comments = [...(commentsByResource[resourceId] || [])];
+  const commentIndex = comments.findIndex(
+    (comment) => String(comment.id) === String(commentId)
+  );
+  if (commentIndex < 0) throw new Error("comment not found");
+
+  const comment = comments[commentIndex];
+  const viewerId = state.session?.userId || previewUser.userId;
+  const ownerId =
+    comment.ownerId ||
+    (comment.displayName === previewUser.displayName ? previewUser.userId : "");
+  if (ownerId !== viewerId) throw new Error("cannot delete another user's comment");
+
+  const hasReplies = comments.some(
+    (candidate) => String(candidate.parentId) === String(commentId)
+  );
+  if (hasReplies) {
+    comments[commentIndex] = {
+      ...comment,
+      content: "",
+      isDeleted: true,
+      canDelete: false
+    };
+  } else {
+    comments.splice(commentIndex, 1);
+  }
+
+  commentsByResource[resourceId] = comments;
+  previewMemory.comments = commentsByResource;
+  writePreviewData(previewStorageKeys.comments, commentsByResource);
+  return { deleted: true, commentId, retainedThread: hasReplies };
 }
 
 function getPublicationCategory(categoryId) {
@@ -1346,17 +1410,9 @@ function makeProfileResourceCard(resource, options = {}) {
   const body = document.createElement("div");
   body.className = "profile-resource-body";
 
-  const filterMeta = getResourceFilterMeta(resource);
   const meta = document.createElement("div");
   meta.className = "profile-resource-meta";
-
-  const scope = makeCategoryTag(resource, filterMeta.scopeLabel);
-
-  const tag = document.createElement("span");
-  tag.className = "profile-filter-tag";
-  tag.textContent = filterMeta.tagLabel;
-
-  meta.append(scope, tag);
+  meta.appendChild(makeCategoryTag(resource));
 
   const title = document.createElement("h3");
   title.textContent = resource.title;
@@ -1665,7 +1721,7 @@ function getCommentTree(comments) {
 
 function countCommentThread(comment, childrenByParent) {
   const children = childrenByParent.get(String(comment.id)) || [];
-  return 1 + children.reduce(
+  return (comment.isDeleted ? 0 : 1) + children.reduce(
     (count, child) => count + countCommentThread(child, childrenByParent),
     0
   );
@@ -1765,6 +1821,28 @@ function clearReply() {
   commentInput.placeholder = "写下你对这个案例的看法";
 }
 
+async function deleteComment(comment, button) {
+  if (!comment.canDelete || !state.commentResource) return;
+  if (!window.confirm("删除这条评论？此操作无法撤销。")) return;
+
+  button.disabled = true;
+  try {
+    const resourceId = getResourceId(state.commentResource);
+    await deleteResourceComment(resourceId, comment.id);
+    const comments = await loadComments(state.commentResource, { force: true });
+    const selectedCommentStillExists = comments.some(
+      (candidate) => String(candidate.id) === String(state.commentThreadRootId)
+    );
+    if (state.commentThreadRootId != null && !selectedCommentStillExists) {
+      closeComments();
+    }
+  } catch (error) {
+    window.alert("评论删除失败。只有评论本人可以删除，请刷新后重试。");
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function createCommentItem(comment, childrenByParent, depth = 0) {
   const wrapper = document.createElement("div");
   wrapper.className = "comment-thread";
@@ -1772,6 +1850,7 @@ function createCommentItem(comment, childrenByParent, depth = 0) {
 
   const item = document.createElement("article");
   item.className = "comment-item";
+  item.classList.toggle("is-deleted", Boolean(comment.isDeleted));
 
   const body = document.createElement("div");
   body.className = "comment-body";
@@ -1789,14 +1868,38 @@ function createCommentItem(comment, childrenByParent, depth = 0) {
   const content = document.createElement("p");
   content.textContent = comment.content;
 
+  const actions = document.createElement("div");
+  actions.className = "comment-actions";
+
   const replyButton = document.createElement("button");
   replyButton.className = "comment-reply";
   replyButton.type = "button";
   replyButton.textContent = "回复";
   replyButton.addEventListener("click", () => startReply(comment));
+  if (!comment.isDeleted) actions.appendChild(replyButton);
+
+  if (comment.canDelete) {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "comment-delete";
+    deleteButton.type = "button";
+    deleteButton.title = "删除评论";
+    deleteButton.setAttribute("aria-label", "删除自己的评论");
+    deleteButton.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16"></path>
+        <path d="M9 7V4h6v3"></path>
+        <path d="m7 7 1 13h8l1-13"></path>
+        <path d="M10 11v5M14 11v5"></path>
+      </svg>
+      <span>删除</span>
+    `;
+    deleteButton.addEventListener("click", () => deleteComment(comment, deleteButton));
+    actions.appendChild(deleteButton);
+  }
 
   meta.append(name, time);
-  body.append(meta, content, replyButton);
+  body.append(meta, content);
+  if (actions.childElementCount) body.appendChild(actions);
   item.append(createCommentAvatar(comment), body);
   wrapper.appendChild(item);
 

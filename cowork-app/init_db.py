@@ -80,6 +80,8 @@ ALTER TABLE comments
 ADD COLUMN IF NOT EXISTS position_x DOUBLE PRECISION;
 ALTER TABLE comments
 ADD COLUMN IF NOT EXISTS position_y DOUBLE PRECISION;
+ALTER TABLE comments
+ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS idx_comments_resource_created
 ON comments (resource_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_comments_parent

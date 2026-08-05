@@ -129,17 +129,24 @@ def _upsert_user(conn: psycopg.Connection, user: dict) -> None:
     )
 
 
-def _serialize_comment(row: dict) -> dict:
+def _serialize_comment(row: dict, viewer_id: Optional[str] = None) -> dict:
+    is_deleted = bool(row.get("is_deleted"))
     return {
         "id": row["id"],
         "resourceId": row["resource_id"],
         "parentId": row["parent_id"],
-        "content": row["content"],
-        "displayName": row["display_name"],
-        "avatar": row["avatar_url"],
+        "content": "该评论已删除" if is_deleted else row["content"],
+        "displayName": "已删除评论" if is_deleted else row["display_name"],
+        "avatar": "" if is_deleted else row["avatar_url"],
         "positionX": row.get("position_x"),
         "positionY": row.get("position_y"),
         "createdAt": row["created_at"].isoformat(),
+        "isDeleted": is_deleted,
+        "canDelete": bool(
+            not is_deleted
+            and viewer_id
+            and str(row.get("owner_id") or "") == str(viewer_id)
+        ),
     }
 
 
@@ -529,6 +536,7 @@ def list_comment_counts(
             """
             SELECT resource_id, COUNT(*) AS comment_count
             FROM comments
+            WHERE is_deleted = FALSE
             GROUP BY resource_id
             """
         ).fetchall()
@@ -556,10 +564,12 @@ def list_comments(
             SELECT
               c.id,
               c.resource_id,
+              c.owner_id,
               c.parent_id,
               c.content,
               c.position_x,
               c.position_y,
+              c.is_deleted,
               c.created_at,
               u.display_name,
               u.avatar_url
@@ -572,8 +582,9 @@ def list_comments(
         ).fetchall()
         conn.commit()
 
-    comments = [_serialize_comment(row) for row in rows]
-    return JSONResponse({"comments": comments, "count": len(comments)})
+    comments = [_serialize_comment(row, user["userId"]) for row in rows]
+    count = sum(not comment["isDeleted"] for comment in comments)
+    return JSONResponse({"comments": comments, "count": count})
 
 
 @app.post("/api/comments/{resource_id}", status_code=201)
@@ -626,10 +637,12 @@ def create_comment(
             RETURNING
               id,
               resource_id,
+              owner_id,
               parent_id,
               content,
               position_x,
               position_y,
+              is_deleted,
               created_at
             """,
             (
@@ -645,4 +658,70 @@ def create_comment(
 
     row["display_name"] = user["displayName"]
     row["avatar_url"] = user["avatar"]
-    return JSONResponse(_serialize_comment(row), status_code=201)
+    return JSONResponse(
+        _serialize_comment(row, user["userId"]),
+        status_code=201,
+    )
+
+
+@app.delete("/api/comments/{resource_id}/{comment_id}")
+def delete_comment(
+    resource_id: str,
+    comment_id: int,
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    clean_resource_id = resource_id.strip()
+    if not clean_resource_id or len(clean_resource_id) > 240:
+        raise HTTPException(status_code=400, detail="invalid resource id")
+
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        comment = conn.execute(
+            """
+            SELECT
+              c.id,
+              c.resource_id,
+              c.owner_id,
+              c.is_deleted,
+              EXISTS (
+                SELECT 1
+                FROM comments AS child
+                WHERE child.parent_id = c.id
+              ) AS has_replies
+            FROM comments AS c
+            WHERE c.id = %s AND c.resource_id = %s
+            """,
+            (comment_id, clean_resource_id),
+        ).fetchone()
+
+        if not comment:
+            raise HTTPException(status_code=404, detail="comment not found")
+        if str(comment["owner_id"]) != user["userId"]:
+            raise HTTPException(status_code=403, detail="cannot delete another user's comment")
+
+        retained_thread = bool(comment["has_replies"])
+        if not comment["is_deleted"]:
+            if retained_thread:
+                conn.execute(
+                    """
+                    UPDATE comments
+                    SET content = '', is_deleted = TRUE
+                    WHERE id = %s AND owner_id = %s
+                    """,
+                    (comment_id, user["userId"]),
+                )
+            else:
+                conn.execute(
+                    "DELETE FROM comments WHERE id = %s AND owner_id = %s",
+                    (comment_id, user["userId"]),
+                )
+        conn.commit()
+
+    return JSONResponse(
+        {
+            "deleted": True,
+            "commentId": comment_id,
+            "retainedThread": retained_thread,
+        }
+    )
