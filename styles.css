@@ -1537,14 +1537,17 @@ body.is-masonry-view {
   font-size: 11px;
 }
 
-.app-shell.is-all-mode .resource-card .category {
+.app-shell.is-all-mode .resource-card .category,
+.profile-resource-card .category {
   gap: 4px;
   max-width: 180px;
   min-height: 22px;
   padding: 2px 7px;
+  font-size: 11px;
 }
 
-.app-shell.is-all-mode .resource-card .category-icon {
+.app-shell.is-all-mode .resource-card .category-icon,
+.profile-resource-card .category-icon {
   flex-basis: 12px;
   width: 12px;
   height: 12px;

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>设计资源精选</title>
-    <link rel="stylesheet" href="./styles.css?v=47" />
+    <link rel="stylesheet" href="./styles.css?v=48" />
   </head>
   <body>
     <main class="app-shell" aria-live="polite">
@@ -259,6 +259,18 @@
             </fieldset>
 
             <label class="publication-field">
+              <span>资源名称 <small>选填，留空由 AI 生成</small></span>
+              <input
+                id="publicationName"
+                name="title"
+                type="text"
+                maxlength="80"
+                autocomplete="off"
+                placeholder="输入产品或项目名称"
+              />
+            </label>
+
+            <label class="publication-field">
               <span>资源链接 <strong>*</strong></span>
               <input
                 id="publicationUrl"
@@ -344,6 +356,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="./app.js?v=29"></script>
+    <script src="./app.js?v=30"></script>
   </body>
 </html>

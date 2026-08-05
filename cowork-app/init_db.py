@@ -63,8 +63,12 @@ ALTER TABLE publications
 ADD COLUMN IF NOT EXISTS error_message TEXT NOT NULL DEFAULT '';
 ALTER TABLE publications
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE publications
+ADD COLUMN IF NOT EXISTS issue_id TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS idx_publications_owner_created
 ON publications (owner_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_publications_issue_created
+ON publications (issue_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS comments (
     id          BIGSERIAL PRIMARY KEY,

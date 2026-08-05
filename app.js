@@ -305,6 +305,75 @@ const issues = [
   }
 ];
 
+const issueSchedule = {
+  anchorTime: Date.parse("2026-07-08T00:00:00+08:00"),
+  anchorYear: 2026,
+  anchorWeek: 29,
+  duration: 7 * 24 * 60 * 60 * 1000
+};
+
+function getScheduledIssueId(index) {
+  let year = issueSchedule.anchorYear;
+  let week = issueSchedule.anchorWeek + Math.max(0, index);
+  while (week > 52) {
+    week -= 52;
+    year += 1;
+  }
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+function getScheduledIssueIndex(issueId) {
+  for (let index = 0; index < 520; index += 1) {
+    if (getScheduledIssueId(index) === issueId) return index;
+  }
+  return -1;
+}
+
+function getIssueIndexForDate(value = Date.now()) {
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return Math.max(0, issues.length - 1);
+  return Math.max(
+    0,
+    Math.floor((time - issueSchedule.anchorTime) / issueSchedule.duration)
+  );
+}
+
+function formatIssueDate(time) {
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "numeric",
+    day: "numeric"
+  }).formatToParts(new Date(time));
+  const month = parts.find((part) => part.type === "month")?.value || "";
+  const day = parts.find((part) => part.type === "day")?.value || "";
+  return `${month}.${day}`;
+}
+
+function formatIssueOrdinal(value) {
+  const numerals = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+  if (value < 10) return numerals[value];
+  if (value < 20) return `十${value % 10 ? numerals[value % 10] : ""}`;
+  if (value < 100) {
+    return `${numerals[Math.floor(value / 10)]}十${value % 10 ? numerals[value % 10] : ""}`;
+  }
+  return String(value);
+}
+
+function getScheduledIssue(index) {
+  const normalizedIndex = Math.max(0, index);
+  const startTime =
+    issueSchedule.anchorTime + normalizedIndex * issueSchedule.duration;
+  const endTime = startTime + issueSchedule.duration;
+  const id = getScheduledIssueId(normalizedIndex);
+  const dateRange = `${formatIssueDate(startTime)}-${formatIssueDate(endTime)}`;
+  return {
+    id,
+    label: `第${formatIssueOrdinal(normalizedIndex + 1)}期（${dateRange}）`,
+    range: `${id} / ${dateRange}`,
+    resources: []
+  };
+}
+
 const filterTaxonomy = [
   {
     id: "product",
@@ -475,6 +544,7 @@ const state = {
   sessionState: "loading",
   favoriteIds: new Set(),
   publications: [],
+  communityPublications: [],
   commentCounts: new Map(),
   commentCache: new Map(),
   comments: [],
@@ -563,6 +633,7 @@ const publicationClose = document.querySelector("#publicationClose");
 const publicationCancel = document.querySelector("#publicationCancel");
 const publicationForm = document.querySelector("#publicationForm");
 const publicationCategories = document.querySelector("#publicationCategories");
+const publicationName = document.querySelector("#publicationName");
 const publicationUrl = document.querySelector("#publicationUrl");
 const publicationDescription = document.querySelector("#publicationDescription");
 const publicationAction = document.querySelector("#publicationAction");
@@ -573,12 +644,77 @@ function getLatestIssue() {
   return issues[issues.length - 1];
 }
 
+function getPublicationIssueId(publication) {
+  if (publication.issueId) return publication.issueId;
+  return getScheduledIssueId(getIssueIndexForDate(publication.createdAt));
+}
+
+function getReadyCommunityPublications() {
+  return state.communityPublications.filter(
+    (publication) => publication.status === "READY"
+  );
+}
+
+function getIssueResourcesById(issueId) {
+  const curatedResources =
+    issues.find((issue) => issue.id === issueId)?.resources || [];
+  const communityResources = getReadyCommunityPublications().filter(
+    (publication) => getPublicationIssueId(publication) === issueId
+  );
+  const seen = new Set();
+  return [...curatedResources, ...communityResources].filter((resource) => {
+    const resourceId = getResourceId(resource);
+    if (seen.has(resourceId)) return false;
+    seen.add(resourceId);
+    return true;
+  });
+}
+
+function getAvailableIssues() {
+  const issueIds = new Set(issues.map((issue) => issue.id));
+  getReadyCommunityPublications().forEach((publication) => {
+    issueIds.add(getPublicationIssueId(publication));
+  });
+
+  return [...issueIds]
+    .map((issueId) => {
+      const curatedIssue = issues.find((issue) => issue.id === issueId);
+      const scheduledIndex = getScheduledIssueIndex(issueId);
+      const issue =
+        curatedIssue ||
+        getScheduledIssue(
+          scheduledIndex >= 0 ? scheduledIndex : getIssueIndexForDate()
+        );
+      return {
+        ...issue,
+        resources: getIssueResourcesById(issueId)
+      };
+    })
+    .sort((first, second) => {
+      const firstIndex = getScheduledIssueIndex(first.id);
+      const secondIndex = getScheduledIssueIndex(second.id);
+      return firstIndex - secondIndex;
+    });
+}
+
 function getSelectedIssue() {
-  return issues.find((issue) => issue.id === state.issueId) || getLatestIssue();
+  return (
+    getAvailableIssues().find((issue) => issue.id === state.issueId) ||
+    getLatestIssue()
+  );
 }
 
 function getAllResources() {
-  return [...issues].reverse().flatMap((issue) => issue.resources);
+  const seen = new Set();
+  return [...getAvailableIssues()]
+    .reverse()
+    .flatMap((issue) => issue.resources)
+    .filter((resource) => {
+      const resourceId = getResourceId(resource);
+      if (seen.has(resourceId)) return false;
+      seen.add(resourceId);
+      return true;
+    });
 }
 
 function getResourceId(resource) {
@@ -614,7 +750,7 @@ function isResourceFavorite(resource) {
 
 function getIssueResources() {
   if (state.issueId === "all") return getAllResources();
-  return getSelectedIssue().resources;
+  return getIssueResourcesById(state.issueId);
 }
 
 function getTaxonomyScope(scopeId) {
@@ -991,14 +1127,14 @@ function getPublicationCategory(categoryId) {
 function makePreviewPublicationMetadata(publication) {
   const hostname = new URL(publication.url).hostname.replace(/^www\./, "");
   const rawName = hostname.split(".")[0].replace(/[-_]+/g, " ").trim();
-  const title = rawName
+  const generatedTitle = rawName
     .split(/\s+/)
     .filter(Boolean)
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ");
   return {
     ...publication,
-    title: title || "新设计资源",
+    title: publication.requestedTitle || generatedTitle || "新设计资源",
     summary: `一个值得进一步体验和拆解的${publication.category}资源。`,
     description:
       publication.description ||
@@ -1022,8 +1158,15 @@ function completePreviewPublication(resourceId) {
     publications[index] = makePreviewPublicationMetadata(publications[index]);
     persistPreviewPublications(publications);
     state.publications = publications;
+    state.communityPublications = publications.filter(
+      (publication) => publication.status === "READY"
+    );
     syncFavoriteButtons();
     if (state.mode === "profile") renderProfile();
+    if (state.mode === "all") {
+      renderIssueMenu();
+      renderCards();
+    }
   }, 1800);
 }
 
@@ -1040,7 +1183,8 @@ async function createPublication(payload) {
   const resourceId = `publication-preview-${Date.now()}`;
   const publication = {
     resourceId,
-    title: "AI 正在生成中",
+    title: payload.title || "AI 正在生成中",
+    requestedTitle: payload.title || "",
     category: category.label,
     summary: "",
     description: payload.description || "",
@@ -1049,6 +1193,7 @@ async function createPublication(payload) {
     coverImage: `https://image.thum.io/get/width/1200/crop/760/noanimate/${payload.url}`,
     visualLabel: category.label,
     filterScopeId: category.id,
+    issueId: getScheduledIssueId(getIssueIndexForDate(now)),
     status: "GENERATING",
     createdAt: now,
     updatedAt: now
@@ -1062,12 +1207,21 @@ async function createPublication(payload) {
 async function refreshPublications() {
   if (isStandalonePreview) {
     state.publications = getPreviewPublications();
+    state.communityPublications = state.publications.filter(
+      (publication) => publication.status === "READY"
+    );
   } else {
-    const payload = await requestJson("/api/publications");
-    state.publications = payload.publications || [];
+    const [ownPayload, communityPayload] = await Promise.all([
+      requestJson("/api/publications"),
+      requestJson("/api/publications/community")
+    ]);
+    state.publications = ownPayload.publications || [];
+    state.communityPublications = communityPayload.publications || [];
   }
+  renderIssueMenu();
   syncFavoriteButtons();
   if (state.mode === "profile") renderProfile();
+  if (state.mode === "all") renderCards();
   schedulePublicationPolling();
 }
 
@@ -1094,6 +1248,9 @@ async function loadMemberData() {
     state.sessionState = "ready";
     state.favoriteIds = new Set(getPreviewFavorites());
     state.publications = getPreviewPublications();
+    state.communityPublications = state.publications.filter(
+      (publication) => publication.status === "READY"
+    );
     state.publications
       .filter((publication) => publication.status === "GENERATING")
       .forEach((publication) => completePreviewPublication(publication.resourceId));
@@ -1102,6 +1259,7 @@ async function loadMemberData() {
     updateCommentPointIdentity();
     syncFavoriteButtons();
     syncCommentButtons();
+    renderIssueMenu();
     renderProfile();
     loadActiveResourceComments();
     schedulePublicationPolling();
@@ -1114,16 +1272,25 @@ async function loadMemberData() {
     updateSessionUI();
     updateCommentPointIdentity();
 
-    const [favoritesPayload, publicationsPayload, commentCountsPayload] = await Promise.all([
+    const [
+      favoritesPayload,
+      publicationsPayload,
+      communityPublicationsPayload,
+      commentCountsPayload
+    ] = await Promise.all([
       requestJson("/api/favorites"),
       requestJson("/api/publications"),
+      requestJson("/api/publications/community"),
       requestJson("/api/comment-counts")
     ]);
     state.favoriteIds = new Set(favoritesPayload.resourceIds || []);
     state.publications = publicationsPayload.publications || [];
+    state.communityPublications =
+      communityPublicationsPayload.publications || [];
     state.commentCounts = new Map(Object.entries(commentCountsPayload.counts || {}));
     syncFavoriteButtons();
     syncCommentButtons();
+    renderIssueMenu();
     renderProfile();
     loadActiveResourceComments();
     schedulePublicationPolling();
@@ -1470,7 +1637,10 @@ function makePublicationCard(resource) {
   }
 
   const title = document.createElement("h3");
-  title.textContent = generating ? "正在读取资源" : resource.title;
+  title.textContent =
+    generating && resource.title === "AI 正在生成中"
+      ? "正在读取资源"
+      : resource.title;
   article.append(media, title);
 
   if (!generating) {
@@ -1620,7 +1790,7 @@ function openPublicationDialog(trigger) {
   publicationLayer.classList.add("is-open");
   publicationLayer.setAttribute("aria-hidden", "false");
   document.body.classList.add("is-publication-open");
-  requestAnimationFrame(() => publicationUrl.focus());
+  requestAnimationFrame(() => publicationName.focus());
 }
 
 function closePublicationDialog() {
@@ -1647,6 +1817,7 @@ async function submitPublication(event) {
   try {
     const publication = await createPublication({
       categoryId: categoryInput.value,
+      title: publicationName.value.trim(),
       url: publicationUrl.value.trim(),
       description: publicationDescription.value.trim(),
       action: publicationAction.value.trim()
@@ -1727,6 +1898,16 @@ function countCommentThread(comment, childrenByParent) {
   );
 }
 
+function getVisibleThreadOwner(comment, childrenByParent) {
+  if (!comment.isDeleted) return comment;
+  const children = childrenByParent.get(String(comment.id)) || [];
+  for (const child of children) {
+    const visibleOwner = getVisibleThreadOwner(child, childrenByParent);
+    if (visibleOwner) return visibleOwner;
+  }
+  return null;
+}
+
 function getCommentPosition(comment, index) {
   const positionX = Number(comment.positionX);
   const positionY = Number(comment.positionY);
@@ -1766,6 +1947,9 @@ function renderCommentPins() {
   roots.forEach((comment, index) => {
     const position = getCommentPosition(comment, index);
     const threadCount = countCommentThread(comment, childrenByParent);
+    const visibleOwner = getVisibleThreadOwner(comment, childrenByParent);
+    if (threadCount === 0 || !visibleOwner) return;
+
     const pin = document.createElement("button");
     pin.className = "comment-pin";
     pin.type = "button";
@@ -1779,14 +1963,14 @@ function renderCommentPins() {
     );
     pin.setAttribute(
       "aria-label",
-      `查看 ${comment.displayName} 的 ${threadCount} 条讨论`
+      `查看 ${visibleOwner.displayName} 的 ${threadCount} 条讨论`
     );
 
     const avatarWrap = document.createElement("span");
     avatarWrap.className = "comment-pin-avatar-wrap";
     const avatar = document.createElement("span");
     avatar.className = "comment-pin-avatar";
-    setCommentAvatarVisual(avatar, comment);
+    setCommentAvatarVisual(avatar, visibleOwner);
     const count = document.createElement("span");
     count.className = "comment-pin-count";
     count.textContent = threadCount > 99 ? "99+" : String(threadCount);
@@ -1794,7 +1978,7 @@ function renderCommentPins() {
 
     const name = document.createElement("span");
     name.className = "comment-pin-name";
-    name.textContent = comment.displayName;
+    name.textContent = visibleOwner.displayName;
     pin.append(avatarWrap, name);
     pin.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -1830,6 +2014,13 @@ async function deleteComment(comment, button) {
     const resourceId = getResourceId(state.commentResource);
     await deleteResourceComment(resourceId, comment.id);
     const comments = await loadComments(state.commentResource, { force: true });
+    const hasVisibleComments = comments.some(
+      (candidate) => !candidate.isDeleted
+    );
+    if (!hasVisibleComments) {
+      closeComments();
+      return;
+    }
     const selectedCommentStillExists = comments.some(
       (candidate) => String(candidate.id) === String(state.commentThreadRootId)
     );
@@ -1935,7 +2126,7 @@ function renderComments() {
     return;
   }
 
-  if (!state.comments.length) {
+  if (!state.comments.some((comment) => !comment.isDeleted)) {
     renderCommentMessage(
       "还没有评论",
       "关闭详情后，点击评论按钮，在内容区外放置第一条案例评论。"
@@ -1944,9 +2135,15 @@ function renderComments() {
   }
 
   const { roots, childrenByParent } = getCommentTree(state.comments);
-  const visibleRoots = state.commentThreadRootId == null
-    ? roots
-    : roots.filter((comment) => comment.id === state.commentThreadRootId);
+  const rootsWithVisibleComments = roots.filter(
+    (comment) => countCommentThread(comment, childrenByParent) > 0
+  );
+  const visibleRoots =
+    state.commentThreadRootId == null
+      ? rootsWithVisibleComments
+      : rootsWithVisibleComments.filter(
+          (comment) => comment.id === state.commentThreadRootId
+        );
 
   if (!visibleRoots.length) {
     renderCommentMessage("评论不存在", "这条评论可能已被移除，请关闭后重新选择。");
@@ -1954,9 +2151,11 @@ function renderComments() {
   }
 
   const selectedRoot = visibleRoots[0];
+  const selectedOwner =
+    getVisibleThreadOwner(selectedRoot, childrenByParent) || selectedRoot;
   if (state.commentResource) {
     commentResourceLabel.textContent = state.commentResource.title;
-    commentDrawerTitle.textContent = `${selectedRoot.displayName} 的讨论`;
+    commentDrawerTitle.textContent = `${selectedOwner.displayName} 的讨论`;
   }
 
   const fragment = document.createDocumentFragment();
@@ -2461,7 +2660,7 @@ function renderIssueMenu() {
       label: "全部",
       meta: `${getAllResources().length} 个案例`
     },
-    ...[...issues].reverse().map((issue) => ({
+    ...[...getAvailableIssues()].reverse().map((issue) => ({
       id: issue.id,
       label: issue.label,
       meta: `${issue.resources.length} 个案例`

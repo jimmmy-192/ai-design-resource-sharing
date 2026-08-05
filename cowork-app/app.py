@@ -4,9 +4,11 @@ from __future__ import annotations
 import json
 import re
 import uuid
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote, urlparse
+from zoneinfo import ZoneInfo
 
 import httpx
 import psycopg
@@ -18,6 +20,11 @@ from psycopg.rows import dict_row
 
 
 BASE_DIR = Path(__file__).resolve().parent
+SHANGHAI_TIMEZONE = ZoneInfo("Asia/Shanghai")
+ISSUE_ANCHOR = datetime(2026, 7, 8, tzinfo=SHANGHAI_TIMEZONE)
+ISSUE_DURATION = timedelta(days=7)
+ISSUE_ANCHOR_YEAR = 2026
+ISSUE_ANCHOR_WEEK = 29
 
 
 class CommentCreate(BaseModel):
@@ -29,6 +36,7 @@ class CommentCreate(BaseModel):
 
 class PublicationCreate(BaseModel):
     categoryId: str
+    title: Optional[str] = None
     url: str
     description: Optional[str] = None
     action: Optional[str] = None
@@ -151,6 +159,7 @@ def _serialize_comment(row: dict, viewer_id: Optional[str] = None) -> dict:
 
 
 def _serialize_publication(row: dict) -> dict:
+    created_at = row["created_at"]
     return {
         "resourceId": row["resource_id"],
         "title": row["title"],
@@ -162,10 +171,28 @@ def _serialize_publication(row: dict) -> dict:
         "coverImage": row["cover_image"],
         "visualLabel": row.get("visual_label") or row["category"],
         "filterScopeId": row.get("filter_scope") or "",
+        "issueId": row.get("issue_id") or _publication_issue_id(created_at),
         "status": row.get("status") or "READY",
-        "createdAt": row["created_at"].isoformat(),
-        "updatedAt": row.get("updated_at", row["created_at"]).isoformat(),
+        "createdAt": created_at.isoformat(),
+        "updatedAt": row.get("updated_at", created_at).isoformat(),
     }
+
+
+def _publication_issue_id(value: Optional[datetime] = None) -> str:
+    created_at = value or datetime.now(tz=SHANGHAI_TIMEZONE)
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=SHANGHAI_TIMEZONE)
+    local_created_at = created_at.astimezone(SHANGHAI_TIMEZONE)
+    issue_index = max(
+        0,
+        int((local_created_at - ISSUE_ANCHOR).total_seconds() // ISSUE_DURATION.total_seconds()),
+    )
+    year = ISSUE_ANCHOR_YEAR
+    week = ISSUE_ANCHOR_WEEK + issue_index
+    while week > 52:
+        week -= 52
+        year += 1
+    return f"{year}-W{week:02d}"
 
 
 def _publication_cover_url(url: str) -> str:
@@ -175,14 +202,17 @@ def _publication_cover_url(url: str) -> str:
 def _fallback_publication_metadata(
     url: str,
     category: str,
+    requested_title: str,
     description: str,
     action: str,
 ) -> dict[str, str]:
     host = (urlparse(url).hostname or "新资源").removeprefix("www.")
     raw_name = host.split(".", 1)[0].replace("-", " ").replace("_", " ").strip()
-    title = " ".join(part.capitalize() for part in raw_name.split()) or "新设计资源"
+    generated_title = (
+        " ".join(part.capitalize() for part in raw_name.split()) or "新设计资源"
+    )
     return {
-        "title": title[:80],
+        "title": (requested_title or generated_title)[:80],
         "summary": f"一个值得进一步体验和拆解的{category}资源。",
         "description": description
         or f"该资源来自 {host}，可用于观察其核心能力、页面结构和典型使用流程，并与现有设计方案进行对照。",
@@ -208,10 +238,17 @@ def _generate_publication_metadata(
     publication_id: int,
     url: str,
     category: str,
+    requested_title: str,
     description: str,
     action: str,
 ) -> None:
-    fallback = _fallback_publication_metadata(url, category, description, action)
+    fallback = _fallback_publication_metadata(
+        url,
+        category,
+        requested_title,
+        description,
+        action,
+    )
     result = dict(fallback)
     error_message = ""
 
@@ -224,6 +261,7 @@ def _generate_publication_metadata(
 你在整理一个面向产品设计师的中文设计资源库。请根据下面的信息生成案例卡片内容。
 链接：{url}
 大类：{category}
+用户填写的资源名称：{requested_title or "未填写"}
 用户补充的案例解读：{description or "未填写"}
 用户补充的“可以怎么用”：{action or "未填写"}
 
@@ -269,6 +307,8 @@ def _generate_publication_metadata(
                 result["description"] = description[:1200]
             if action:
                 result["action"] = action[:800]
+            if requested_title:
+                result["title"] = requested_title[:80]
     except Exception as error:
         error_message = str(error)[:500]
 
@@ -421,6 +461,7 @@ def list_publications(
               cover_image,
               visual_label,
               filter_scope,
+              issue_id,
               status,
               created_at,
               updated_at
@@ -429,6 +470,41 @@ def list_publications(
             ORDER BY created_at DESC
             """,
             (user["userId"],),
+        ).fetchall()
+        conn.commit()
+
+    publications = [_serialize_publication(row) for row in rows]
+    return JSONResponse({"publications": publications})
+
+
+@app.get("/api/publications/community")
+def list_community_publications(
+    decrypted_userinfo: Optional[str] = Header(None, alias="Decrypted-Userinfo"),
+) -> JSONResponse:
+    user = _require_user(decrypted_userinfo)
+    with _get_db_conn() as conn:
+        _upsert_user(conn, user)
+        rows = conn.execute(
+            """
+            SELECT
+              resource_id,
+              title,
+              category,
+              summary,
+              description,
+              action,
+              url,
+              cover_image,
+              visual_label,
+              filter_scope,
+              issue_id,
+              status,
+              created_at,
+              updated_at
+            FROM publications
+            WHERE status = 'READY'
+            ORDER BY created_at DESC
+            """
         ).fetchall()
         conn.commit()
 
@@ -445,6 +521,7 @@ def create_publication(
     user = _require_user(decrypted_userinfo)
     category_id = payload.categoryId.strip()
     category = PUBLICATION_CATEGORIES.get(category_id)
+    requested_title = (payload.title or "").strip()
     clean_url = payload.url.strip()
     description = (payload.description or "").strip()
     action = (payload.action or "").strip()
@@ -458,11 +535,14 @@ def create_publication(
         or len(clean_url) > 2000
     ):
         raise HTTPException(status_code=400, detail="invalid url")
+    if len(requested_title) > 80:
+        raise HTTPException(status_code=400, detail="title is too long")
     if len(description) > 1200 or len(action) > 800:
         raise HTTPException(status_code=400, detail="content is too long")
 
     resource_id = f"publication-{uuid.uuid4().hex}"
     cover_image = _publication_cover_url(clean_url)
+    issue_id = _publication_issue_id()
     with _get_db_conn() as conn:
         _upsert_user(conn, user)
         row = conn.execute(
@@ -479,10 +559,14 @@ def create_publication(
               cover_image,
               visual_label,
               filter_scope,
+              issue_id,
               status,
               updated_at
             )
-            VALUES (%s, %s, %s, %s, '', %s, %s, %s, %s, %s, %s, 'GENERATING', NOW())
+            VALUES (
+              %s, %s, %s, %s, '', %s, %s, %s, %s, %s, %s, %s,
+              'GENERATING', NOW()
+            )
             RETURNING
               id,
               resource_id,
@@ -495,6 +579,7 @@ def create_publication(
               cover_image,
               visual_label,
               filter_scope,
+              issue_id,
               status,
               created_at,
               updated_at
@@ -502,7 +587,7 @@ def create_publication(
             (
                 user["userId"],
                 resource_id,
-                "AI 正在生成中",
+                requested_title or "AI 正在生成中",
                 category,
                 description,
                 action,
@@ -510,6 +595,7 @@ def create_publication(
                 cover_image,
                 category,
                 category_id,
+                issue_id,
             ),
         ).fetchone()
         conn.commit()
@@ -519,6 +605,7 @@ def create_publication(
         row["id"],
         clean_url,
         category,
+        requested_title,
         description,
         action,
     )
